@@ -60,7 +60,6 @@
             margin: 0 auto;
         }
 
-        /* Header */
         .header-bar {
             display: flex;
             justify-content: space-between;
@@ -92,7 +91,6 @@
             background: var(--border-light);
         }
 
-        /* Login */
         .login-card {
             max-width: 380px;
             margin: 15vh auto;
@@ -129,7 +127,6 @@
             border-color: var(--accent);
         }
 
-        /* Navigation */
         .nav-tabs {
             display: flex;
             background: var(--bg-surface);
@@ -353,7 +350,6 @@
             text-align: right;
         }
 
-        /* Receipt Print Style */
         @media print {
             body * {
                 visibility: hidden;
@@ -483,7 +479,6 @@
             font-weight: 500;
         }
         
-        /* Modal Styles */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -531,7 +526,6 @@
         
         audio { display: none; }
         
-        /* Email settings card in admin panel */
         .email-section {
             background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-surface) 100%);
             border: 2px solid var(--accent);
@@ -592,7 +586,6 @@
             <button class="nav-tab" data-page="settings">Settings</button>
         </div>
 
-        <!-- Billing Page -->
         <div id="salesPage" class="page active-page">
             <div class="card">
                 <div class="card-title">Menu</div>
@@ -637,7 +630,6 @@
             </div>
         </div>
 
-        <!-- Totals Page -->
         <div id="totalsPage" class="page">
             <div class="stats-grid">
                 <div class="stat-tile"><div class="stat-label">Total Items</div><div class="stat-number" id="totalItemsStat">0</div></div>
@@ -668,14 +660,12 @@
             </div>
         </div>
 
-        <!-- Insights Page -->
         <div id="insightsPage" class="page">
             <div class="card"><div class="card-title">Daily Summary</div><div id="insightSummary"></div></div>
             <div class="card"><div class="card-title">Staff Performance</div><div id="staffPerfList"></div></div>
             <div class="card"><div class="card-title">Top Products</div><div id="topProductsInsight"></div></div>
         </div>
 
-        <!-- Settings Page (Public) - No email settings here anymore -->
         <div id="settingsPage" class="page">
             <div class="card">
                 <div class="card-title">Business Profile</div>
@@ -704,10 +694,6 @@
                     <input type="number" id="newProdPrice" placeholder="Price" style="flex:1; padding:10px; border-radius:12px; border:1px solid var(--border); background:var(--bg-surface);">
                     <button id="addProductBtnSettings" class="btn-secondary">Add</button>
                 </div>
-                <hr style="margin:20px 0; border-color:var(--border);">
-                <div class="info-text" style="text-align: center; margin-bottom: 12px;">
-                    ⚙️ Email Report Settings moved to Admin Zone (🔐 Admin PIN required)
-                </div>
                 <button id="adminZoneBtn" class="admin-zone-btn">🔐 Admin Zone</button>
                 <div class="credit-line">Made by Meraj Mohi Uddin (Meraj Shah)</div>
             </div>
@@ -715,7 +701,6 @@
     </div>
 </div>
 
-<!-- Admin Password Modal -->
 <div id="adminPasswordModal" class="modal-overlay">
     <div class="modal-content-custom">
         <h3 style="margin-bottom: 16px;">Admin Verification</h3>
@@ -725,12 +710,10 @@
     </div>
 </div>
 
-<!-- Admin Panel Modal (Now includes Email Settings) -->
 <div id="adminPanelModal" class="modal-overlay">
     <div class="modal-content-custom">
         <h3>👑 Admin Control Panel</h3>
         
-        <!-- Email Report Settings Section (Now inside Admin Zone) -->
         <div class="email-section">
             <div class="card-title" style="margin-bottom: 8px;">
                 📧 Email Report Settings 
@@ -791,7 +774,6 @@
     </div>
 </div>
 
-<!-- Factory Reset Confirm Modal -->
 <div id="factoryResetConfirmModal" class="modal-overlay">
     <div class="modal-content-custom">
         <h3 style="color: var(--danger);">⚠️ Factory Reset</h3>
@@ -828,7 +810,6 @@
     let taxName = "TAX";
     let darkMode = false;
     
-    // Email settings
     let emailSettings = {
         publicKey: "",
         serviceId: "",
@@ -836,7 +817,6 @@
         sendToEmail: ""
     };
     
-    // Security
     let adminPin = "0000";
     let employees = [{ name: "Staff", pin: "1234" }];
     
@@ -872,15 +852,16 @@
                 if (data.employees && data.employees.length) employees = data.employees;
                 else employees = [{ name: "Staff", pin: "1234" }];
                 if (data.emailSettings) emailSettings = data.emailSettings;
-            } catch(e) {}
+            } catch(e) { console.log("Error loading:", e); }
         }
         if (!products.length) products = [{ id:"p1", name:"Ceramic Mug", price:24 }];
         if (darkMode) document.body.classList.add('dark');
         else document.body.classList.remove('dark');
         
-        // Initialize EmailJS if public key exists
         if(emailSettings.publicKey) {
-            emailjs.init(emailSettings.publicKey);
+            try {
+                emailjs.init(emailSettings.publicKey);
+            } catch(e) {}
             updateAdminEmailStatusBadge(true);
         } else {
             updateAdminEmailStatusBadge(false);
@@ -900,7 +881,6 @@
         }
     }
     
-    // Generate HTML Report for Email
     function generateEmailReport() {
         const customerSales = sales.filter(s => s.category === "Customer");
         const totalRevenue = customerSales.reduce((sum, s) => sum + s.price, 0);
@@ -914,7 +894,6 @@
         const dineinCount = sales.filter(s => s.orderType === "Dine-in").length;
         const employeeMeals = sales.filter(s => s.category === "Employee").length;
         
-        // Staff performance
         const staffMap = new Map();
         sales.forEach(s => {
             if(s.category === "Customer") {
@@ -928,7 +907,6 @@
             staffHtml += `<tr><td>${staff}</td><td>${currencySymbol}${revenue.toFixed(2)}</td></tr>`;
         }
         
-        // Top products
         const productCount = {};
         sales.filter(s => s.category === "Customer").forEach(s => {
             productCount[s.productName] = (productCount[s.productName] || 0) + 1;
@@ -939,7 +917,6 @@
             productsHtml += `<tr><td>${name}</td><td>${count} sold</td></tr>`;
         });
         
-        // Recent transactions
         let transactionsHtml = "";
         sales.slice(-10).reverse().forEach(s => {
             transactionsHtml += `<tr><td>${s.time}</td><td>${s.productName}</td><td>${currencySymbol}${s.price.toFixed(2)}</td><td>${s.paymentMode}</td><td>${s.addedBy}</td></tr>`;
@@ -1037,14 +1014,12 @@
         `;
     }
     
-    // Send Email Report
     async function sendEmailReport(isAutoSend = false) {
         if(!emailSettings.publicKey || !emailSettings.serviceId || !emailSettings.templateId || !emailSettings.sendToEmail) {
-            if(!isAutoSend) alert("⚠️ Please configure EmailJS settings first!\n\nGo to Settings → Email Report Settings and fill in your EmailJS credentials.");
+            if(!isAutoSend) alert("⚠️ Please configure EmailJS settings first!\n\nGo to Admin Zone → Email Report Settings");
             return false;
         }
         
-        // Initialize EmailJS if not already
         try {
             emailjs.init(emailSettings.publicKey);
         } catch(e) {}
@@ -1076,7 +1051,6 @@
         }
     }
     
-    // End Session with Auto Email
     async function endSessionWithReport() {
         if(confirm("End session and send daily report to email?\n\nThis will logout and can't be undone.")) {
             const endBtn = document.getElementById("endSessionFromSalesBtn");
@@ -1119,6 +1093,7 @@
         h = h % 12 || 12;
         return `${h}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')} ${ampm}`;
     }
+    
     function getCurrentDate() { 
         const d = new Date();
         return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
@@ -1318,7 +1293,8 @@
     
     function updateDisplay() {
         const { grand } = computeGrandTotal();
-        document.getElementById("finalTotalSpan").innerHTML = `<strong>${currencySymbol}${grand.toFixed(2)}</strong>`;
+        const finalSpan = document.getElementById("finalTotalSpan");
+        if(finalSpan) finalSpan.innerHTML = `<strong>${currencySymbol}${grand.toFixed(2)}</strong>`;
     }
     
     function renderTotalsPage() {
@@ -1331,15 +1307,24 @@
         const cardTotal = sales.filter(s=>s.paymentMode==="Card" && s.category==="Customer").reduce((s,i)=>s+i.price,0);
         const upiTotal = sales.filter(s=>s.paymentMode==="UPI" && s.category==="Customer").reduce((s,i)=>s+i.price,0);
         
-        document.getElementById("totalItemsStat").innerHTML = sales.length;
-        document.getElementById("totalRevenueStat").innerHTML = `${currencySymbol}${revenue.toFixed(2)}`;
-        document.getElementById("parcelCountStat").innerHTML = parcelCount;
-        document.getElementById("dineinCountStat").innerHTML = dineinCount;
-        document.getElementById("cashTotalStat").innerHTML = `${currencySymbol}${cashTotal.toFixed(2)}`;
-        document.getElementById("cardTotalStat").innerHTML = `${currencySymbol}${cardTotal.toFixed(2)}`;
-        document.getElementById("upiTotalStat").innerHTML = `${currencySymbol}${upiTotal.toFixed(2)}`;
+        const itemsStat = document.getElementById("totalItemsStat");
+        const revenueStat = document.getElementById("totalRevenueStat");
+        const parcelStat = document.getElementById("parcelCountStat");
+        const dineinStat = document.getElementById("dineinCountStat");
+        const cashStat = document.getElementById("cashTotalStat");
+        const cardStat = document.getElementById("cardTotalStat");
+        const upiStat = document.getElementById("upiTotalStat");
+        
+        if(itemsStat) itemsStat.innerHTML = sales.length;
+        if(revenueStat) revenueStat.innerHTML = `${currencySymbol}${revenue.toFixed(2)}`;
+        if(parcelStat) parcelStat.innerHTML = parcelCount;
+        if(dineinStat) dineinStat.innerHTML = dineinCount;
+        if(cashStat) cashStat.innerHTML = `${currencySymbol}${cashTotal.toFixed(2)}`;
+        if(cardStat) cardStat.innerHTML = `${currencySymbol}${cardTotal.toFixed(2)}`;
+        if(upiStat) upiStat.innerHTML = `${currencySymbol}${upiTotal.toFixed(2)}`;
         
         const tbody = document.getElementById("totalsTableBody");
+        if(!tbody) return;
         if(!sales.length){ tbody.innerHTML="<tr><td colspan='6' style='text-align:center'>No records</td></tr>"; return; }
         tbody.innerHTML = sales.slice().reverse().map((s,i)=>`<tr><td>${i+1}</td><td>${s.time}</td><td>${s.productName}</td><td>${currencySymbol}${s.price}</td><td>${s.paymentMode}</td><td>${s.addedBy}</td></tr>`).join('');
     }
@@ -1348,28 +1333,43 @@
         const staffMap = new Map();
         sales.forEach(s=>{ let st = s.addedBy; if(!staffMap.has(st)) staffMap.set(st,{items:0,rev:0}); let d=staffMap.get(st); d.items++; if(s.category==="Customer") d.rev+=s.price; });
         let staffHtml = staffMap.size ? Array.from(staffMap.entries()).map(([n,d])=>`<div style="margin-bottom:10px;"><strong>${n}</strong> — ${d.items} items | ${currencySymbol}${d.rev.toFixed(2)}</div>`).join('') : "<div>No sales</div>";
-        document.getElementById("staffPerfList").innerHTML = staffHtml;
+        const staffList = document.getElementById("staffPerfList");
+        if(staffList) staffList.innerHTML = staffHtml;
+        
         let prodCount = {};
         sales.filter(s=>s.category==="Customer").forEach(s=>{ prodCount[s.productName] = (prodCount[s.productName]||0)+1; });
         let top = Object.entries(prodCount).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([n,c])=>`<div>${n} — ${c} sold</div>`).join('');
-        document.getElementById("topProductsInsight").innerHTML = top || "<div>No data</div>";
-        document.getElementById("insightSummary").innerHTML = `<div>Total Sales: ${sales.length} items | Employee meals: ${sales.filter(s=>s.category==="Employee").length}</div>`;
+        const topProducts = document.getElementById("topProductsInsight");
+        if(topProducts) topProducts.innerHTML = top || "<div>No data</div>";
+        
+        const insightSummary = document.getElementById("insightSummary");
+        if(insightSummary) insightSummary.innerHTML = `<div>Total Sales: ${sales.length} items | Employee meals: ${sales.filter(s=>s.category==="Employee").length}</div>`;
     }
     
     function renderSettingsUI() {
-        document.getElementById("businessNameInput").value = businessName;
-        document.getElementById("businessTagline").value = businessTagline;
-        document.getElementById("businessInfoInput").value = businessInfo;
-        document.getElementById("footerMsgInput").value = footerMessage;
-        document.getElementById("currencySelect").value = currencySymbol;
-        document.getElementById("defaultTaxRate").value = defaultTaxPercent;
-        document.getElementById("taxName").value = taxName;
+        const bizName = document.getElementById("businessNameInput");
+        const bizTag = document.getElementById("businessTagline");
+        const bizInfo = document.getElementById("businessInfoInput");
+        const footer = document.getElementById("footerMsgInput");
+        const currency = document.getElementById("currencySelect");
+        const taxRate = document.getElementById("defaultTaxRate");
+        const taxNameInput = document.getElementById("taxName");
+        
+        if(bizName) bizName.value = businessName;
+        if(bizTag) bizTag.value = businessTagline;
+        if(bizInfo) bizInfo.value = businessInfo;
+        if(footer) footer.value = footerMessage;
+        if(currency) currency.value = currencySymbol;
+        if(taxRate) taxRate.value = defaultTaxPercent;
+        if(taxNameInput) taxNameInput.value = taxName;
         
         const prodContainer = document.getElementById("dynamicProductList");
-        prodContainer.innerHTML = products.map(p => `<div class="product-item-control"><span>${p.name} — ${currencySymbol}${p.price}</span><button class="delProdBtn" data-id="${p.id}" style="background:var(--danger); color:white; border:none; border-radius:10px; padding:4px 14px; cursor:pointer;">Remove</button></div>`).join('');
-        document.querySelectorAll('.delProdBtn').forEach(btn => {
-            btn.addEventListener('click', () => { if(products.length>1){ products = products.filter(p=> p.id !== btn.dataset.id); saveAll(); renderAllUI(); } });
-        });
+        if(prodContainer) {
+            prodContainer.innerHTML = products.map(p => `<div class="product-item-control"><span>${p.name} — ${currencySymbol}${p.price}</span><button class="delProdBtn" data-id="${p.id}" style="background:var(--danger); color:white; border:none; border-radius:10px; padding:4px 14px; cursor:pointer;">Remove</button></div>`).join('');
+            document.querySelectorAll('.delProdBtn').forEach(btn => {
+                btn.addEventListener('click', () => { if(products.length>1){ products = products.filter(p=> p.id !== btn.dataset.id); saveAll(); renderAllUI(); } });
+            });
+        }
     }
     
     function renderEmployees() {
@@ -1382,13 +1382,21 @@
     }
     
     function renderActiveStates() {
-        document.getElementById("orderParcelBtn")?.classList.toggle("active", selectedOrder==="parcel");
-        document.getElementById("orderDineinBtn")?.classList.toggle("active", selectedOrder==="dinein");
-        document.getElementById("payCashBtn")?.classList.toggle("active", selectedPayment==="cash");
-        document.getElementById("payCardBtn")?.classList.toggle("active", selectedPayment==="card");
-        document.getElementById("payUpiBtn")?.classList.toggle("active", selectedPayment==="upi");
-        document.getElementById("catCustomerBtn")?.classList.toggle("active", selectedCategory==="customer");
-        document.getElementById("catEmployeeBtn")?.classList.toggle("active", selectedCategory==="employee");
+        const orderParcel = document.getElementById("orderParcelBtn");
+        const orderDinein = document.getElementById("orderDineinBtn");
+        const payCash = document.getElementById("payCashBtn");
+        const payCard = document.getElementById("payCardBtn");
+        const payUpi = document.getElementById("payUpiBtn");
+        const catCustomer = document.getElementById("catCustomerBtn");
+        const catEmployee = document.getElementById("catEmployeeBtn");
+        
+        if(orderParcel) orderParcel.classList.toggle("active", selectedOrder==="parcel");
+        if(orderDinein) orderDinein.classList.toggle("active", selectedOrder==="dinein");
+        if(payCash) payCash.classList.toggle("active", selectedPayment==="cash");
+        if(payCard) payCard.classList.toggle("active", selectedPayment==="card");
+        if(payUpi) payUpi.classList.toggle("active", selectedPayment==="upi");
+        if(catCustomer) catCustomer.classList.toggle("active", selectedCategory==="customer");
+        if(catEmployee) catEmployee.classList.toggle("active", selectedCategory==="employee");
     }
     
     function renderAllUI() { renderProductButtons(); renderCartUI(); renderActiveStates(); renderTotalsPage(); renderInsights(); renderSettingsUI(); }
@@ -1416,32 +1424,42 @@
     }
     
     function addProduct() { 
-        let name=document.getElementById("newProdName").value.trim(); 
-        let price=parseFloat(document.getElementById("newProdPrice").value); 
+        let name = document.getElementById("newProdName")?.value.trim(); 
+        let price = parseFloat(document.getElementById("newProdPrice")?.value); 
         if(name && !isNaN(price) && price>0){ 
             products.push({ id:"p_"+Date.now(), name, price }); 
             saveAll(); 
             renderAllUI(); 
-            document.getElementById("newProdName").value=""; 
-            document.getElementById("newProdPrice").value=""; 
+            const prodName = document.getElementById("newProdName");
+            const prodPrice = document.getElementById("newProdPrice");
+            if(prodName) prodName.value = ""; 
+            if(prodPrice) prodPrice.value = ""; 
         } else {
             alert("Please enter valid product name and price");
         }
     }
     
     function saveBusiness() { 
-        businessName=document.getElementById("businessNameInput").value; 
-        businessTagline=document.getElementById("businessTagline").value; 
-        businessInfo=document.getElementById("businessInfoInput").value; 
-        footerMessage=document.getElementById("footerMsgInput").value; 
-        currencySymbol=document.getElementById("currencySelect").value; 
+        const bizName = document.getElementById("businessNameInput");
+        const bizTag = document.getElementById("businessTagline");
+        const bizInfo = document.getElementById("businessInfoInput");
+        const footer = document.getElementById("footerMsgInput");
+        const currency = document.getElementById("currencySelect");
+        
+        if(bizName) businessName = bizName.value; 
+        if(bizTag) businessTagline = bizTag.value; 
+        if(bizInfo) businessInfo = bizInfo.value; 
+        if(footer) footerMessage = footer.value; 
+        if(currency) currencySymbol = currency.value; 
         saveAll(); 
         renderAllUI(); 
     }
     
     function saveTax() { 
-        defaultTaxPercent=parseFloat(document.getElementById("defaultTaxRate").value)||0; 
-        taxName=document.getElementById("taxName").value; 
+        const taxRate = document.getElementById("defaultTaxRate");
+        const taxNameInput = document.getElementById("taxName");
+        if(taxRate) defaultTaxPercent = parseFloat(taxRate.value)||0; 
+        if(taxNameInput) taxName = taxNameInput.value; 
         saveAll(); 
         renderAllUI(); 
     }
@@ -1454,10 +1472,15 @@
     }
     
     function saveEmailSettings() {
-        emailSettings.publicKey = document.getElementById("adminEmailjsPublicKey").value.trim();
-        emailSettings.serviceId = document.getElementById("adminEmailjsServiceId").value.trim();
-        emailSettings.templateId = document.getElementById("adminEmailjsTemplateId").value.trim();
-        emailSettings.sendToEmail = document.getElementById("adminReportEmailTo").value.trim();
+        const publicKey = document.getElementById("adminEmailjsPublicKey")?.value.trim();
+        const serviceId = document.getElementById("adminEmailjsServiceId")?.value.trim();
+        const templateId = document.getElementById("adminEmailjsTemplateId")?.value.trim();
+        const sendToEmail = document.getElementById("adminReportEmailTo")?.value.trim();
+        
+        if(publicKey) emailSettings.publicKey = publicKey;
+        if(serviceId) emailSettings.serviceId = serviceId;
+        if(templateId) emailSettings.templateId = templateId;
+        if(sendToEmail) emailSettings.sendToEmail = sendToEmail;
         
         if(emailSettings.publicKey) {
             try {
@@ -1477,7 +1500,6 @@
         sendEmailReport(false);
     }
     
-    // Helper function to add Enter key support
     function addEnterSupport(inputId, buttonId) {
         const input = document.getElementById(inputId);
         const button = document.getElementById(buttonId);
@@ -1495,147 +1517,211 @@
         loadAll();
         updateClock();
         
-        // LOGIN SCREEN - Enter key support
+        // Login Enter support
         addEnterSupport("loginStaffInput", "doLoginBtn");
         addEnterSupport("loginPinInput", "doLoginBtn");
         
-        document.getElementById("doLoginBtn").onclick=()=>{ 
-            let name = document.getElementById("loginStaffInput").value.trim(); 
-            let pin = document.getElementById("loginPinInput").value;
-            let validEmployee = employees.find(e => e.name === name && e.pin === pin);
-            if(validEmployee){ 
-                currentStaff = name; 
-                document.getElementById("loginScreen").style.display="none"; 
-                document.getElementById("mainDashboard").style.display="block"; 
-                renderAllUI(); 
-            } else if(pin === adminPin) {
-                currentStaff = "Admin";
-                document.getElementById("loginScreen").style.display="none"; 
-                document.getElementById("mainDashboard").style.display="block"; 
-                renderAllUI();
-            } else { 
-                alert("Invalid credentials! Check Name and PIN (Default Staff PIN: 1234)"); 
-            }
-        };
+        const loginBtn = document.getElementById("doLoginBtn");
+        if(loginBtn) {
+            loginBtn.onclick = () => { 
+                let name = document.getElementById("loginStaffInput")?.value.trim() || ""; 
+                let pin = document.getElementById("loginPinInput")?.value || "";
+                let validEmployee = employees.find(e => e.name === name && e.pin === pin);
+                if(validEmployee){ 
+                    currentStaff = name; 
+                    const loginScreen = document.getElementById("loginScreen");
+                    const mainDashboard = document.getElementById("mainDashboard");
+                    if(loginScreen) loginScreen.style.display = "none"; 
+                    if(mainDashboard) mainDashboard.style.display = "block"; 
+                    renderAllUI(); 
+                } else if(pin === adminPin) {
+                    currentStaff = "Admin";
+                    const loginScreen = document.getElementById("loginScreen");
+                    const mainDashboard = document.getElementById("mainDashboard");
+                    if(loginScreen) loginScreen.style.display = "none"; 
+                    if(mainDashboard) mainDashboard.style.display = "block"; 
+                    renderAllUI();
+                } else { 
+                    alert("Invalid credentials! Check Name and PIN (Default Staff PIN: 1234, Admin PIN: 0000)"); 
+                }
+            };
+        }
         
-        // Navigation tabs        document.querySelectorAll(".nav-tab").forEach(t=>{ 
-            t.onclick=()=>{ 
-                document.querySelectorAll(".nav-tab").forEach(n=>n.classList.remove("active")); 
+        // Navigation tabs
+        document.querySelectorAll(".nav-tab").forEach(t => { 
+            t.onclick = () => { 
+                document.querySelectorAll(".nav-tab").forEach(n => n.classList.remove("active")); 
                 t.classList.add("active"); 
-                document.querySelectorAll(".page").forEach(p=>p.classList.remove("active-page")); 
-                document.getElementById(t.dataset.page+"Page").classList.add("active-page"); 
+                document.querySelectorAll(".page").forEach(p => p.classList.remove("active-page")); 
+                const pageId = t.dataset.page + "Page";
+                const page = document.getElementById(pageId);
+                if(page) page.classList.add("active-page"); 
             }; 
         });
         
         // Billing buttons
-        document.getElementById("orderParcelBtn").onclick=()=>{ selectedOrder="parcel"; renderActiveStates(); };
-        document.getElementById("orderDineinBtn").onclick=()=>{ selectedOrder="dinein"; renderActiveStates(); };
-        document.getElementById("payCashBtn").onclick=()=>{ selectedPayment="cash"; renderActiveStates(); };
-        document.getElementById("payCardBtn").onclick=()=>{ selectedPayment="card"; renderActiveStates(); };
-        document.getElementById("payUpiBtn").onclick=()=>{ selectedPayment="upi"; renderActiveStates(); };
-        document.getElementById("catCustomerBtn").onclick=()=>{ selectedCategory="customer"; renderActiveStates(); };
-        document.getElementById("catEmployeeBtn").onclick=()=>{ selectedCategory="employee"; renderActiveStates(); };
-        document.getElementById("addSaleWithBillBtn").onclick=confirmSale;
-        document.getElementById("printReceiptBtn").onclick=printReceipt;
-        document.getElementById("resetDayTotalsBtn").onclick=resetDay;
-        document.getElementById("sendReportNowBtn").onclick=()=>sendEmailReport(false);
-        document.getElementById("endSessionFromSalesBtn").onclick=endSessionWithReport;
-        document.getElementById("darkModeToggle").onclick=toggleDarkMode;
-        document.getElementById("discountPercentInput").addEventListener('input', ()=>updateDisplay());
+        const orderParcel = document.getElementById("orderParcelBtn");
+        const orderDinein = document.getElementById("orderDineinBtn");
+        const payCash = document.getElementById("payCashBtn");
+        const payCard = document.getElementById("payCardBtn");
+        const payUpi = document.getElementById("payUpiBtn");
+        const catCustomer = document.getElementById("catCustomerBtn");
+        const catEmployee = document.getElementById("catEmployeeBtn");
+        const addSaleBtn = document.getElementById("addSaleWithBillBtn");
+        const printBtn = document.getElementById("printReceiptBtn");
+        const resetDayBtn = document.getElementById("resetDayTotalsBtn");
+        const sendReportBtn = document.getElementById("sendReportNowBtn");
+        const endSessionBtn = document.getElementById("endSessionFromSalesBtn");
+        const darkModeBtn = document.getElementById("darkModeToggle");
+        const discountInput = document.getElementById("discountPercentInput");
         
-        // Settings page buttons with Enter support
-        document.getElementById("addProductBtnSettings").onclick=addProduct;
+        if(orderParcel) orderParcel.onclick = () => { selectedOrder="parcel"; renderActiveStates(); };
+        if(orderDinein) orderDinein.onclick = () => { selectedOrder="dinein"; renderActiveStates(); };
+        if(payCash) payCash.onclick = () => { selectedPayment="cash"; renderActiveStates(); };
+        if(payCard) payCard.onclick = () => { selectedPayment="card"; renderActiveStates(); };
+        if(payUpi) payUpi.onclick = () => { selectedPayment="upi"; renderActiveStates(); };
+        if(catCustomer) catCustomer.onclick = () => { selectedCategory="customer"; renderActiveStates(); };
+        if(catEmployee) catEmployee.onclick = () => { selectedCategory="employee"; renderActiveStates(); };
+        if(addSaleBtn) addSaleBtn.onclick = confirmSale;
+        if(printBtn) printBtn.onclick = printReceipt;
+        if(resetDayBtn) resetDayBtn.onclick = resetDay;
+        if(sendReportBtn) sendReportBtn.onclick = () => sendEmailReport(false);
+        if(endSessionBtn) endSessionBtn.onclick = endSessionWithReport;
+        if(darkModeBtn) darkModeBtn.onclick = toggleDarkMode;
+        if(discountInput) discountInput.addEventListener('input', () => updateDisplay());
+        
+        // Settings page buttons
+        const addProductBtn = document.getElementById("addProductBtnSettings");
+        const saveBusinessBtn = document.getElementById("saveBusinessSettingsBtn");
+        const saveTaxBtn = document.getElementById("saveTaxDefaultsBtn");
+        
+        if(addProductBtn) addProductBtn.onclick = addProduct;
         addEnterSupport("newProdName", "addProductBtnSettings");
         addEnterSupport("newProdPrice", "addProductBtnSettings");
         
-        document.getElementById("saveBusinessSettingsBtn").onclick=saveBusiness;
-        document.getElementById("saveTaxDefaultsBtn").onclick=saveTax;
+        if(saveBusinessBtn) saveBusinessBtn.onclick = saveBusiness;
+        if(saveTaxBtn) saveTaxBtn.onclick = saveTax;
         
-        // Admin Zone Logic
-        document.getElementById("adminZoneBtn").onclick = () => {
-            document.getElementById("adminPasswordModal").classList.add("active");
-            document.getElementById("adminPasswordInput").value = "";
-        };
+        // Admin Zone
+        const adminZoneBtn = document.getElementById("adminZoneBtn");
+        const closeAdminPasswordModal = document.getElementById("closeAdminPasswordModal");
+        const verifyAdminBtn = document.getElementById("verifyAdminBtn");
+        const closeAdminPanelBtn = document.getElementById("closeAdminPanelBtn");
+        const addEmployeeBtn = document.getElementById("addEmployeeBtn");
+        const updateAdminPinBtn = document.getElementById("updateAdminPinBtn");
+        const factoryResetBtn = document.getElementById("factoryResetBtn");
+        const cancelFactoryResetBtn = document.getElementById("cancelFactoryResetBtn");
+        const confirmFactoryResetBtn = document.getElementById("confirmFactoryResetBtn");
+        const adminSaveEmailBtn = document.getElementById("adminSaveEmailSettingsBtn");
+        const adminTestEmailBtn = document.getElementById("adminTestEmailBtn");
         
-        document.getElementById("closeAdminPasswordModal").onclick = () => document.getElementById("adminPasswordModal").classList.remove("active");
+        if(adminZoneBtn) {
+            adminZoneBtn.onclick = () => {
+                const modal = document.getElementById("adminPasswordModal");
+                const input = document.getElementById("adminPasswordInput");
+                if(modal) modal.classList.add("active");
+                if(input) input.value = "";
+            };
+        }
         
-        // Admin PIN verification with Enter support
+        if(closeAdminPasswordModal) {
+            closeAdminPasswordModal.onclick = () => document.getElementById("adminPasswordModal")?.classList.remove("active");
+        }
+        
         addEnterSupport("adminPasswordInput", "verifyAdminBtn");
         
-        document.getElementById("verifyAdminBtn").onclick = () => {
-            let entered = document.getElementById("adminPasswordInput").value;
-            if(entered === adminPin) {
-                document.getElementById("adminPasswordModal").classList.remove("active");
-                document.getElementById("adminPanelModal").classList.add("active");
-                // Load current email settings into admin panel
-                document.getElementById("adminEmailjsPublicKey").value = emailSettings.publicKey || "";
-                document.getElementById("adminEmailjsServiceId").value = emailSettings.serviceId || "";
-                document.getElementById("adminEmailjsTemplateId").value = emailSettings.templateId || "";
-                document.getElementById("adminReportEmailTo").value = emailSettings.sendToEmail || "";
-                renderEmployees();
-                updateAdminEmailStatusBadge(true);
-            } else alert("Wrong Admin PIN");
-        };
+        if(verifyAdminBtn) {
+            verifyAdminBtn.onclick = () => {
+                let entered = document.getElementById("adminPasswordInput")?.value || "";
+                if(entered === adminPin) {
+                    document.getElementById("adminPasswordModal")?.classList.remove("active");
+                    document.getElementById("adminPanelModal")?.classList.add("active");
+                    const pubKey = document.getElementById("adminEmailjsPublicKey");
+                    const servId = document.getElementById("adminEmailjsServiceId");
+                    const tempId = document.getElementById("adminEmailjsTemplateId");
+                    const sendTo = document.getElementById("adminReportEmailTo");
+                    if(pubKey) pubKey.value = emailSettings.publicKey || "";
+                    if(servId) servId.value = emailSettings.serviceId || "";
+                    if(tempId) tempId.value = emailSettings.templateId || "";
+                    if(sendTo) sendTo.value = emailSettings.sendToEmail || "";
+                    renderEmployees();
+                    updateAdminEmailStatusBadge(true);
+                } else alert("Wrong Admin PIN");
+            };
+        }
         
-        document.getElementById("closeAdminPanelBtn").onclick = () => document.getElementById("adminPanelModal").classList.remove("active");
+        if(closeAdminPanelBtn) {
+            closeAdminPanelBtn.onclick = () => document.getElementById("adminPanelModal")?.classList.remove("active");
+        }
         
-        // Add Employee with Enter support
         addEnterSupport("newEmpName", "addEmployeeBtn");
         addEnterSupport("newEmpPin", "addEmployeeBtn");
         
-        document.getElementById("addEmployeeBtn").onclick = () => {
-            let name = document.getElementById("newEmpName").value.trim();
-            let pin = document.getElementById("newEmpPin").value;
-            if(name && pin.length === 4 && /^\d+$/.test(pin)) {
-                employees.push({ name, pin });
-                saveAll();
-                renderEmployees();
-                document.getElementById("newEmpName").value = "";
-                document.getElementById("newEmpPin").value = "";
-            } else alert("Valid name and 4-digit PIN required");
-        };
+        if(addEmployeeBtn) {
+            addEmployeeBtn.onclick = () => {
+                let name = document.getElementById("newEmpName")?.value.trim() || "";
+                let pin = document.getElementById("newEmpPin")?.value || "";
+                if(name && pin.length === 4 && /^\d+$/.test(pin)) {
+                    employees.push({ name, pin });
+                    saveAll();
+                    renderEmployees();
+                    const empName = document.getElementById("newEmpName");
+                    const empPin = document.getElementById("newEmpPin");
+                    if(empName) empName.value = "";
+                    if(empPin) empPin.value = "";
+                } else alert("Valid name and 4-digit PIN required");
+            };
+        }
         
-        // Update Admin PIN with Enter support
         addEnterSupport("newAdminPin1", "updateAdminPinBtn");
         addEnterSupport("newAdminPin2", "updateAdminPinBtn");
         
-        document.getElementById("updateAdminPinBtn").onclick = () => {
-            let pin1 = document.getElementById("newAdminPin1").value;
-            let pin2 = document.getElementById("newAdminPin2").value;
-            if(pin1.length === 4 && pin1 === pin2 && /^\d+$/.test(pin1)) {
-                adminPin = pin1;
-                saveAll();
-                alert("Admin PIN updated successfully!");
-                document.getElementById("newAdminPin1").value = "";
-                document.getElementById("newAdminPin2").value = "";
-            } else alert("Enter matching 4-digit PIN");
-        };
+        if(updateAdminPinBtn) {
+            updateAdminPinBtn.onclick = () => {
+                let pin1 = document.getElementById("newAdminPin1")?.value || "";
+                let pin2 = document.getElementById("newAdminPin2")?.value || "";
+                if(pin1.length === 4 && pin1 === pin2 && /^\d+$/.test(pin1)) {
+                    adminPin = pin1;
+                    saveAll();
+                    alert("Admin PIN updated successfully!");
+                    const newPin1 = document.getElementById("newAdminPin1");
+                    const newPin2 = document.getElementById("newAdminPin2");
+                    if(newPin1) newPin1.value = "";
+                    if(newPin2) newPin2.value = "";
+                } else alert("Enter matching 4-digit PIN");
+            };
+        }
         
-        // Email settings buttons
-        document.getElementById("adminSaveEmailSettingsBtn").onclick = saveEmailSettings;
-        document.getElementById("adminTestEmailBtn").onclick = testEmail;
+        if(adminSaveEmailBtn) adminSaveEmailBtn.onclick = saveEmailSettings;
+        if(adminTestEmailBtn) adminTestEmailBtn.onclick = testEmail;
         
-        // Factory reset
-        document.getElementById("factoryResetBtn").onclick = () => {
-            document.getElementById("adminPanelModal").classList.remove("active");
-            document.getElementById("factoryResetConfirmModal").classList.add("active");
-        };
+        if(factoryResetBtn) {
+            factoryResetBtn.onclick = () => {
+                document.getElementById("adminPanelModal")?.classList.remove("active");
+                document.getElementById("factoryResetConfirmModal")?.classList.add("active");
+            };
+        }
         
-        document.getElementById("cancelFactoryResetBtn").onclick = () => document.getElementById("factoryResetConfirmModal").classList.remove("active");
+        if(cancelFactoryResetBtn) {
+            cancelFactoryResetBtn.onclick = () => document.getElementById("factoryResetConfirmModal")?.classList.remove("active");
+        }
         
         addEnterSupport("resetConfirmInput", "confirmFactoryResetBtn");
         
-        document.getElementById("confirmFactoryResetBtn").onclick = () => {
-            let confirmText = document.getElementById("resetConfirmInput").value;
-            if(confirmText === "DELETE") {
-                factoryReset();
-                document.getElementById("factoryResetConfirmModal").classList.remove("active");
-                alert("Factory reset completed!");
-            } else alert("Type DELETE to confirm reset");
-        };
+        if(confirmFactoryResetBtn) {
+            confirmFactoryResetBtn.onclick = () => {
+                let confirmText = document.getElementById("resetConfirmInput")?.value || "";
+                if(confirmText === "DELETE") {
+                    factoryReset();
+                    document.getElementById("factoryResetConfirmModal")?.classList.remove("active");
+                    alert("Factory reset completed!");
+                } else alert("Type DELETE to confirm reset");
+            };
+        }
         
         renderAllUI();
     }
+    
     init();
 </script>
 </body>
