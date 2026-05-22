@@ -505,8 +505,8 @@
             border-radius: 24px;
             padding: 28px;
             width: 90%;
-            max-width: 450px;
-            max-height: 80vh;
+            max-width: 500px;
+            max-height: 85vh;
             overflow-y: auto;
             border: 1px solid var(--border);
         }
@@ -531,10 +531,13 @@
         
         audio { display: none; }
         
-        /* Email settings card */
-        .email-settings-card {
+        /* Email settings card in admin panel */
+        .email-section {
             background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-surface) 100%);
             border: 2px solid var(--accent);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 20px;
         }
         .status-badge {
             display: inline-block;
@@ -551,6 +554,15 @@
         .status-pending {
             background: #ff9800;
             color: white;
+        }
+        .info-text {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            margin-top: 5px;
+        }
+        hr {
+            margin: 16px 0;
+            border-color: var(--border-light);
         }
     </style>
 </head>
@@ -663,33 +675,8 @@
             <div class="card"><div class="card-title">Top Products</div><div id="topProductsInsight"></div></div>
         </div>
 
-        <!-- Settings Page -->
+        <!-- Settings Page (Public) - No email settings here anymore -->
         <div id="settingsPage" class="page">
-            <div class="card email-settings-card">
-                <div class="card-title">📧 Email Report Settings <span id="emailStatusBadge" class="status-badge status-pending">Setup Required</span></div>
-                <div class="setting-row">
-                    <label>EmailJS Public Key (User ID)</label>
-                    <input type="text" id="emailjsPublicKey" placeholder="Your EmailJS Public Key" value="">
-                    <small style="color: var(--text-secondary);">Get it from: <a href="https://dashboard.emailjs.com/admin/integration" target="_blank" style="color: var(--accent);">EmailJS Dashboard → Integration</a></small>
-                </div>
-                <div class="setting-row">
-                    <label>EmailJS Service ID</label>
-                    <input type="text" id="emailjsServiceId" placeholder="service_xxxxxx" value="">
-                    <small style="color: var(--text-secondary);">Create email service (Gmail/Outlook) in EmailJS</small>
-                </div>
-                <div class="setting-row">
-                    <label>EmailJS Template ID</label>
-                    <input type="text" id="emailjsTemplateId" placeholder="template_xxxxxx" value="">
-                    <small style="color: var(--text-secondary);">Create template with: {{report_html}}, {{business_name}}, {{date}}</small>
-                </div>
-                <div class="setting-row">
-                    <label>Send Report To (Email Address)</label>
-                    <input type="email" id="reportEmailTo" placeholder="owner@example.com" value="">
-                </div>
-                <button id="testEmailBtn" class="btn-secondary">Test Email</button>
-                <button id="saveEmailSettingsBtn" class="btn-primary" style="margin-top: 10px;">Save Email Settings</button>
-            </div>
-
             <div class="card">
                 <div class="card-title">Business Profile</div>
                 <div class="setting-row"><label>Brand Name</label><input type="text" id="businessNameInput" placeholder="Your Brand Name"></div>
@@ -718,6 +705,9 @@
                     <button id="addProductBtnSettings" class="btn-secondary">Add</button>
                 </div>
                 <hr style="margin:20px 0; border-color:var(--border);">
+                <div class="info-text" style="text-align: center; margin-bottom: 12px;">
+                    ⚙️ Email Report Settings moved to Admin Zone (🔐 Admin PIN required)
+                </div>
                 <button id="adminZoneBtn" class="admin-zone-btn">🔐 Admin Zone</button>
                 <div class="credit-line">Made by Meraj Mohi Uddin (Meraj Shah)</div>
             </div>
@@ -735,12 +725,45 @@
     </div>
 </div>
 
-<!-- Admin Panel Modal -->
+<!-- Admin Panel Modal (Now includes Email Settings) -->
 <div id="adminPanelModal" class="modal-overlay">
     <div class="modal-content-custom">
         <h3>👑 Admin Control Panel</h3>
         
-        <div class="card-title" style="margin-top: 16px;">👥 Manage Employees</div>
+        <!-- Email Report Settings Section (Now inside Admin Zone) -->
+        <div class="email-section">
+            <div class="card-title" style="margin-bottom: 8px;">
+                📧 Email Report Settings 
+                <span id="adminEmailStatusBadge" class="status-badge status-pending">Setup Required</span>
+            </div>
+            <div class="setting-row">
+                <label>EmailJS Public Key (User ID)</label>
+                <input type="text" id="adminEmailjsPublicKey" placeholder="Your EmailJS Public Key">
+                <div class="info-text">Get from: <a href="https://dashboard.emailjs.com/admin/integration" target="_blank" style="color: var(--accent);">EmailJS Dashboard → Integration</a></div>
+            </div>
+            <div class="setting-row">
+                <label>EmailJS Service ID</label>
+                <input type="text" id="adminEmailjsServiceId" placeholder="service_xxxxxx">
+                <div class="info-text">Create email service (Gmail/Outlook) in EmailJS</div>
+            </div>
+            <div class="setting-row">
+                <label>EmailJS Template ID</label>
+                <input type="text" id="adminEmailjsTemplateId" placeholder="template_xxxxxx">
+                <div class="info-text">Create template with: {{report_html}}, {{business_name}}, {{date}}</div>
+            </div>
+            <div class="setting-row">
+                <label>Send Report To (Email Address)</label>
+                <input type="email" id="adminReportEmailTo" placeholder="owner@example.com">
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 12px;">
+                <button id="adminTestEmailBtn" class="btn-secondary" style="flex:1;">Test Email</button>
+                <button id="adminSaveEmailSettingsBtn" class="btn-primary" style="flex:1;">Save Settings</button>
+            </div>
+        </div>
+        
+        <hr>
+        
+        <div class="card-title">👥 Manage Employees</div>
         <div id="employeesList"></div>
         <div style="display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap;">
             <input type="text" id="newEmpName" placeholder="Employee Name" style="flex:2; padding: 10px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg-surface);">
@@ -748,17 +771,23 @@
             <button id="addEmployeeBtn" class="btn-primary" style="width: auto; padding: 10px 16px;">Add</button>
         </div>
 
-        <div class="card-title" style="margin-top: 20px;">🔑 Change Admin PIN</div>
+        <hr>
+
+        <div class="card-title">🔑 Change Admin PIN</div>
         <div style="display: flex; gap: 10px; flex-wrap: wrap;">
             <input type="password" id="newAdminPin1" placeholder="New Admin PIN" maxlength="4" style="flex:1; padding: 10px; border-radius: 12px; border: 1px solid var(--border);">
             <input type="password" id="newAdminPin2" placeholder="Confirm PIN" maxlength="4" style="flex:1; padding: 10px; border-radius: 12px; border: 1px solid var(--border);">
             <button id="updateAdminPinBtn" class="btn-primary" style="width: auto;">Update</button>
         </div>
 
-        <div class="card-title" style="margin-top: 20px;">⚠️ Danger Zone</div>
+        <hr>
+
+        <div class="card-title">⚠️ Danger Zone</div>
         <button id="factoryResetBtn" class="btn-danger" style="width: 100%;">Factory Reset All Data</button>
         
-        <button id="closeAdminPanelBtn" class="btn-secondary" style="margin-top: 16px; width: 100%;">Close Panel</button>
+        <hr>
+        
+        <button id="closeAdminPanelBtn" class="btn-secondary" style="margin-top: 8px; width: 100%;">Close Panel</button>
     </div>
 </div>
 
@@ -852,14 +881,14 @@
         // Initialize EmailJS if public key exists
         if(emailSettings.publicKey) {
             emailjs.init(emailSettings.publicKey);
-            updateEmailStatusBadge(true);
+            updateAdminEmailStatusBadge(true);
         } else {
-            updateEmailStatusBadge(false);
+            updateAdminEmailStatusBadge(false);
         }
     }
     
-    function updateEmailStatusBadge(isConfigured) {
-        const badge = document.getElementById("emailStatusBadge");
+    function updateAdminEmailStatusBadge(isConfigured) {
+        const badge = document.getElementById("adminEmailStatusBadge");
         if(badge) {
             if(isConfigured && emailSettings.publicKey && emailSettings.serviceId && emailSettings.templateId && emailSettings.sendToEmail) {
                 badge.textContent = "✅ Ready";
@@ -939,8 +968,6 @@
                     th, td { padding: 10px; text-align: left; border-bottom: 1px solid #e0e0e0; }
                     th { background: #f0f0f0; font-weight: 600; }
                     .footer { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; font-size: 12px; color: #666; }
-                    .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
-                    .badge-success { background: #d4edda; color: #155724; }
                 </style>
             </head>
             <body>
@@ -1018,9 +1045,9 @@
         }
         
         // Initialize EmailJS if not already
-        if(!emailjs.init) {
+        try {
             emailjs.init(emailSettings.publicKey);
-        }
+        } catch(e) {}
         
         const reportHtml = generateEmailReport();
         const currentDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -1040,9 +1067,6 @@
             if(!isAutoSend) {
                 alert(`✅ Daily report sent successfully to ${emailSettings.sendToEmail}!`);
                 playSuccess();
-            } else {
-                // Silent success for auto-send
-                console.log('Auto-report sent on session end');
             }
             return true;
         } catch(error) {
@@ -1055,19 +1079,17 @@
     // End Session with Auto Email
     async function endSessionWithReport() {
         if(confirm("End session and send daily report to email?\n\nThis will logout and can't be undone.")) {
-            // Show sending indicator
             const endBtn = document.getElementById("endSessionFromSalesBtn");
             const originalText = endBtn.textContent;
             endBtn.textContent = "📧 Sending Report...";
             endBtn.disabled = true;
             
-            // Send email report if configured
             const emailSent = await sendEmailReport(true);
             
             if(emailSent) {
                 alert("✅ Daily report sent! Logging out...");
             } else {
-                if(confirm("⚠️ Email not configured. Send anyway? Click OK to logout without email.")) {
+                if(confirm("⚠️ Email not configured or failed. Send anyway? Click OK to logout without email.")) {
                     alert("Logging out...");
                 } else {
                     endBtn.textContent = originalText;
@@ -1076,7 +1098,6 @@
                 }
             }
             
-            // Clear session and reload
             localStorage.setItem(STORAGE_KEY, JSON.stringify({
                 products, sales, businessName, businessTagline, businessInfo, footerMessage, currencySymbol,
                 defaultTaxPercent, taxName, billCounter, darkMode, adminPin, employees, emailSettings
@@ -1170,7 +1191,6 @@
         if (cart.length === 0) return;
         const { discountVal, taxVal, grand, discountPercent } = computeGrandTotal();
         const subtotal = getSubtotal();
-        const customer = document.getElementById("customerNameField")?.value.trim() || "Guest";
         const paymentLabel = selectedPayment === "cash" ? "Cash" : (selectedPayment === "card" ? "Card" : "UPI");
         const currentTime = getCurrentTime();
         const currentDateFormatted = getFormattedDate();
@@ -1345,12 +1365,6 @@
         document.getElementById("defaultTaxRate").value = defaultTaxPercent;
         document.getElementById("taxName").value = taxName;
         
-        // Email settings
-        document.getElementById("emailjsPublicKey").value = emailSettings.publicKey || "";
-        document.getElementById("emailjsServiceId").value = emailSettings.serviceId || "";
-        document.getElementById("emailjsTemplateId").value = emailSettings.templateId || "";
-        document.getElementById("reportEmailTo").value = emailSettings.sendToEmail || "";
-        
         const prodContainer = document.getElementById("dynamicProductList");
         prodContainer.innerHTML = products.map(p => `<div class="product-item-control"><span>${p.name} — ${currencySymbol}${p.price}</span><button class="delProdBtn" data-id="${p.id}" style="background:var(--danger); color:white; border:none; border-radius:10px; padding:4px 14px; cursor:pointer;">Remove</button></div>`).join('');
         document.querySelectorAll('.delProdBtn').forEach(btn => {
@@ -1401,36 +1415,89 @@
         alert("Factory reset completed!");
     }
     
-    function addProduct() { let name=document.getElementById("newProdName").value.trim(); let price=parseFloat(document.getElementById("newProdPrice").value); if(name && !isNaN(price) && price>0){ products.push({ id:"p_"+Date.now(), name, price }); saveAll(); renderAllUI(); document.getElementById("newProdName").value=""; document.getElementById("newProdPrice").value=""; } }
-    function saveBusiness() { businessName=document.getElementById("businessNameInput").value; businessTagline=document.getElementById("businessTagline").value; businessInfo=document.getElementById("businessInfoInput").value; footerMessage=document.getElementById("footerMsgInput").value; currencySymbol=document.getElementById("currencySelect").value; saveAll(); renderAllUI(); }
-    function saveTax() { defaultTaxPercent=parseFloat(document.getElementById("defaultTaxRate").value)||0; taxName=document.getElementById("taxName").value; saveAll(); renderAllUI(); }
-    function toggleDarkMode() { darkMode = !darkMode; if(darkMode) document.body.classList.add('dark'); else document.body.classList.remove('dark'); saveAll(); }
+    function addProduct() { 
+        let name=document.getElementById("newProdName").value.trim(); 
+        let price=parseFloat(document.getElementById("newProdPrice").value); 
+        if(name && !isNaN(price) && price>0){ 
+            products.push({ id:"p_"+Date.now(), name, price }); 
+            saveAll(); 
+            renderAllUI(); 
+            document.getElementById("newProdName").value=""; 
+            document.getElementById("newProdPrice").value=""; 
+        } else {
+            alert("Please enter valid product name and price");
+        }
+    }
+    
+    function saveBusiness() { 
+        businessName=document.getElementById("businessNameInput").value; 
+        businessTagline=document.getElementById("businessTagline").value; 
+        businessInfo=document.getElementById("businessInfoInput").value; 
+        footerMessage=document.getElementById("footerMsgInput").value; 
+        currencySymbol=document.getElementById("currencySelect").value; 
+        saveAll(); 
+        renderAllUI(); 
+    }
+    
+    function saveTax() { 
+        defaultTaxPercent=parseFloat(document.getElementById("defaultTaxRate").value)||0; 
+        taxName=document.getElementById("taxName").value; 
+        saveAll(); 
+        renderAllUI(); 
+    }
+    
+    function toggleDarkMode() { 
+        darkMode = !darkMode; 
+        if(darkMode) document.body.classList.add('dark'); 
+        else document.body.classList.remove('dark'); 
+        saveAll(); 
+    }
     
     function saveEmailSettings() {
-        emailSettings.publicKey = document.getElementById("emailjsPublicKey").value.trim();
-        emailSettings.serviceId = document.getElementById("emailjsServiceId").value.trim();
-        emailSettings.templateId = document.getElementById("emailjsTemplateId").value.trim();
-        emailSettings.sendToEmail = document.getElementById("reportEmailTo").value.trim();
+        emailSettings.publicKey = document.getElementById("adminEmailjsPublicKey").value.trim();
+        emailSettings.serviceId = document.getElementById("adminEmailjsServiceId").value.trim();
+        emailSettings.templateId = document.getElementById("adminEmailjsTemplateId").value.trim();
+        emailSettings.sendToEmail = document.getElementById("adminReportEmailTo").value.trim();
         
         if(emailSettings.publicKey) {
-            emailjs.init(emailSettings.publicKey);
+            try {
+                emailjs.init(emailSettings.publicKey);
+            } catch(e) {}
         }
         saveAll();
-        updateEmailStatusBadge(true);
-        alert("Email settings saved!");
+        updateAdminEmailStatusBadge(true);
+        alert("✅ Email settings saved!");
     }
     
     function testEmail() {
         if(!emailSettings.publicKey || !emailSettings.serviceId || !emailSettings.templateId || !emailSettings.sendToEmail) {
-            alert("Please fill all email settings first!");
+            alert("⚠️ Please fill all email settings first!");
             return;
         }
         sendEmailReport(false);
     }
     
+    // Helper function to add Enter key support
+    function addEnterSupport(inputId, buttonId) {
+        const input = document.getElementById(inputId);
+        const button = document.getElementById(buttonId);
+        if(input && button) {
+            input.addEventListener("keypress", function(e) {
+                if(e.key === "Enter") {
+                    e.preventDefault();
+                    button.click();
+                }
+            });
+        }
+    }
+    
     function init() {
         loadAll();
         updateClock();
+        
+        // LOGIN SCREEN - Enter key support
+        addEnterSupport("loginStaffInput", "doLoginBtn");
+        addEnterSupport("loginPinInput", "doLoginBtn");
         
         document.getElementById("doLoginBtn").onclick=()=>{ 
             let name = document.getElementById("loginStaffInput").value.trim(); 
@@ -1451,7 +1518,16 @@
             }
         };
         
-        document.querySelectorAll(".nav-tab").forEach(t=>{ t.onclick=()=>{ document.querySelectorAll(".nav-tab").forEach(n=>n.classList.remove("active")); t.classList.add("active"); document.querySelectorAll(".page").forEach(p=>p.classList.remove("active-page")); document.getElementById(t.dataset.page+"Page").classList.add("active-page"); }; });
+        // Navigation tabs        document.querySelectorAll(".nav-tab").forEach(t=>{ 
+            t.onclick=()=>{ 
+                document.querySelectorAll(".nav-tab").forEach(n=>n.classList.remove("active")); 
+                t.classList.add("active"); 
+                document.querySelectorAll(".page").forEach(p=>p.classList.remove("active-page")); 
+                document.getElementById(t.dataset.page+"Page").classList.add("active-page"); 
+            }; 
+        });
+        
+        // Billing buttons
         document.getElementById("orderParcelBtn").onclick=()=>{ selectedOrder="parcel"; renderActiveStates(); };
         document.getElementById("orderDineinBtn").onclick=()=>{ selectedOrder="dinein"; renderActiveStates(); };
         document.getElementById("payCashBtn").onclick=()=>{ selectedPayment="cash"; renderActiveStates(); };
@@ -1463,30 +1539,49 @@
         document.getElementById("printReceiptBtn").onclick=printReceipt;
         document.getElementById("resetDayTotalsBtn").onclick=resetDay;
         document.getElementById("sendReportNowBtn").onclick=()=>sendEmailReport(false);
-        document.getElementById("addProductBtnSettings").onclick=addProduct;
-        document.getElementById("saveBusinessSettingsBtn").onclick=saveBusiness;
-        document.getElementById("saveTaxDefaultsBtn").onclick=saveTax;
         document.getElementById("endSessionFromSalesBtn").onclick=endSessionWithReport;
         document.getElementById("darkModeToggle").onclick=toggleDarkMode;
         document.getElementById("discountPercentInput").addEventListener('input', ()=>updateDisplay());
-        document.getElementById("loginStaffInput").addEventListener("keypress",(e)=>{ if(e.key==="Enter") document.getElementById("doLoginBtn").click(); });
         
-        // Email settings buttons
-        document.getElementById("saveEmailSettingsBtn").onclick = saveEmailSettings;
-        document.getElementById("testEmailBtn").onclick = testEmail;
+        // Settings page buttons with Enter support
+        document.getElementById("addProductBtnSettings").onclick=addProduct;
+        addEnterSupport("newProdName", "addProductBtnSettings");
+        addEnterSupport("newProdPrice", "addProductBtnSettings");
+        
+        document.getElementById("saveBusinessSettingsBtn").onclick=saveBusiness;
+        document.getElementById("saveTaxDefaultsBtn").onclick=saveTax;
         
         // Admin Zone Logic
-        document.getElementById("adminZoneBtn").onclick = () => document.getElementById("adminPasswordModal").classList.add("active");
+        document.getElementById("adminZoneBtn").onclick = () => {
+            document.getElementById("adminPasswordModal").classList.add("active");
+            document.getElementById("adminPasswordInput").value = "";
+        };
+        
         document.getElementById("closeAdminPasswordModal").onclick = () => document.getElementById("adminPasswordModal").classList.remove("active");
+        
+        // Admin PIN verification with Enter support
+        addEnterSupport("adminPasswordInput", "verifyAdminBtn");
+        
         document.getElementById("verifyAdminBtn").onclick = () => {
             let entered = document.getElementById("adminPasswordInput").value;
             if(entered === adminPin) {
                 document.getElementById("adminPasswordModal").classList.remove("active");
                 document.getElementById("adminPanelModal").classList.add("active");
+                // Load current email settings into admin panel
+                document.getElementById("adminEmailjsPublicKey").value = emailSettings.publicKey || "";
+                document.getElementById("adminEmailjsServiceId").value = emailSettings.serviceId || "";
+                document.getElementById("adminEmailjsTemplateId").value = emailSettings.templateId || "";
+                document.getElementById("adminReportEmailTo").value = emailSettings.sendToEmail || "";
                 renderEmployees();
+                updateAdminEmailStatusBadge(true);
             } else alert("Wrong Admin PIN");
         };
+        
         document.getElementById("closeAdminPanelBtn").onclick = () => document.getElementById("adminPanelModal").classList.remove("active");
+        
+        // Add Employee with Enter support
+        addEnterSupport("newEmpName", "addEmployeeBtn");
+        addEnterSupport("newEmpPin", "addEmployeeBtn");
         
         document.getElementById("addEmployeeBtn").onclick = () => {
             let name = document.getElementById("newEmpName").value.trim();
@@ -1500,6 +1595,10 @@
             } else alert("Valid name and 4-digit PIN required");
         };
         
+        // Update Admin PIN with Enter support
+        addEnterSupport("newAdminPin1", "updateAdminPinBtn");
+        addEnterSupport("newAdminPin2", "updateAdminPinBtn");
+        
         document.getElementById("updateAdminPinBtn").onclick = () => {
             let pin1 = document.getElementById("newAdminPin1").value;
             let pin2 = document.getElementById("newAdminPin2").value;
@@ -1512,11 +1611,20 @@
             } else alert("Enter matching 4-digit PIN");
         };
         
+        // Email settings buttons
+        document.getElementById("adminSaveEmailSettingsBtn").onclick = saveEmailSettings;
+        document.getElementById("adminTestEmailBtn").onclick = testEmail;
+        
+        // Factory reset
         document.getElementById("factoryResetBtn").onclick = () => {
             document.getElementById("adminPanelModal").classList.remove("active");
             document.getElementById("factoryResetConfirmModal").classList.add("active");
         };
+        
         document.getElementById("cancelFactoryResetBtn").onclick = () => document.getElementById("factoryResetConfirmModal").classList.remove("active");
+        
+        addEnterSupport("resetConfirmInput", "confirmFactoryResetBtn");
+        
         document.getElementById("confirmFactoryResetBtn").onclick = () => {
             let confirmText = document.getElementById("resetConfirmInput").value;
             if(confirmText === "DELETE") {
