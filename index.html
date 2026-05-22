@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Minimal Billing System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #f5f5f7;
+            --bg-surface: #ffffff;
+            --bg-card: #ffffff;
+            --text-primary: #1d1d1f;
+            --text-secondary: #86868b;
+            --border: #d2d2d7;
+            --border-light: #e5e5ea;
+            --accent: #000000;
+            --accent-hover: #333333;
+            --btn-secondary-bg: #f5f5f7;
+            --success-bg: #e8f5e9;
+            --danger: #dc2626;
+            --shadow: 0 1px 3px rgba(0,0,0,0.04);
+            --card-radius: 20px;
+        }
+
+        body.dark {
+            --bg-primary: #000000;
+            --bg-surface: #1c1c1e;
+            --bg-card: #1c1c1e;
+            --text-primary: #ffffff;
+            --text-secondary: #8e8e93;
+            --border: #38383a;
+            --border-light: #2c2c2e;
+            --accent: #ffffff;
+            --accent-hover: #e5e5ea;
+            --btn-secondary-bg: #2c2c2e;
+            --shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+
+        body {
+            background: var(--bg-primary);
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            padding: 20px;
+            min-height: 100vh;
+            color: var(--text-primary);
+            transition: all 0.2s ease;
+        }
+
+        .app-container {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .live-clock-header {
+            font-family: 'SF Mono', monospace;
+            font-size: 0.8rem;
+            background: var(--bg-surface);
+            padding: 8px 16px;
+            border-radius: 30px;
+            border: 1px solid var(--border);
+        }
+        .dark-mode-toggle {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            padding: 8px 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            color: var(--text-primary);
+            transition: all 0.2s;
+        }
+        .dark-mode-toggle:hover {
+            background: var(--border-light);
+        }
+
+        /* Login */
+        .login-card {
+            max-width: 380px;
+            margin: 15vh auto;
+            background: var(--bg-surface);
+            border-radius: var(--card-radius);
+            padding: 40px 32px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-light);
+            text-align: center;
+        }
+        .login-card h2 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+            margin-bottom: 8px;
+        }
+        .login-card p {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin-bottom: 28px;
+        }
+        .login-input {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            background: var(--bg-surface);
+            color: var(--text-primary);
+            font-size: 1rem;
+            margin-bottom: 16px;
+            outline: none;
+        }
+        .login-input:focus {
+            border-color: var(--accent);
+        }
+
+        /* Navigation */
+        .nav-tabs {
+            display: flex;
+            background: var(--bg-surface);
+            border-radius: 16px 16px 0 0;
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+        }
+        .nav-tab {
+            flex: 1;
+            text-align: center;
+            padding: 14px 8px;
+            font-weight: 500;
+            font-size: 0.85rem;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            letter-spacing: -0.2px;
+        }
+        .nav-tab.active {
+            color: var(--accent);
+            border-bottom: 2px solid var(--accent);
+        }
+
+        .page {
+            display: none;
+            background: var(--bg-surface);
+            padding: 24px;
+            border-radius: 0 0 20px 20px;
+        }
+        .page.active-page {
+            display: block;
+            animation: fadeIn 0.25s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: 18px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .card-title {
+            font-size: 0.7rem;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 12px 0;
+        }
+        .btn {
+            flex: 1;
+            background: var(--btn-secondary-bg);
+            border: 1px solid var(--border);
+            padding: 10px 12px;
+            border-radius: 12px;
+            font-weight: 500;
+            font-size: 0.8rem;
+            cursor: pointer;
+            color: var(--text-primary);
+            transition: all 0.2s;
+        }
+        .btn.active {
+            background: var(--accent);
+            color: var(--bg-surface);
+            border-color: var(--accent);
+        }
+        .btn-primary {
+            background: var(--accent);
+            color: var(--bg-surface);
+            width: 100%;
+            padding: 14px;
+            border-radius: 14px;
+            font-weight: 600;
+            border: none;
+            margin-top: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+            width: 100%;
+            padding: 12px;
+            border-radius: 14px;
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        .btn-secondary {
+            background: var(--btn-secondary-bg);
+            color: var(--text-primary);
+            padding: 10px 16px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .stat-tile {
+            background: var(--bg-primary);
+            border-radius: 16px;
+            padding: 16px 12px;
+            text-align: center;
+            border: 1px solid var(--border-light);
+        }
+        .stat-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+        .stat-number {
+            font-size: 1.6rem;
+            font-weight: 600;
+        }
+
+        .payment-split-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 8px;
+        }
+        .payment-card {
+            background: var(--bg-primary);
+            border-radius: 16px;
+            padding: 14px;
+            text-align: center;
+            border: 1px solid var(--border-light);
+        }
+        .payment-amount {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-top: 6px;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-light);
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .qty-btn {
+            background: var(--btn-secondary-bg);
+            border: 1px solid var(--border);
+            width: 30px;
+            height: 30px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--text-primary);
+        }
+        .remove-item {
+            background: none;
+            border: none;
+            color: var(--danger);
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            padding: 4px 10px;
+        }
+
+        .setting-row {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .setting-row label {
+            font-weight: 500;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        .setting-row input, .setting-row textarea, .setting-row select {
+            padding: 12px 14px;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            background: var(--bg-surface);
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            outline: none;
+        }
+
+        .bill-preview-card {
+            background: var(--bg-primary);
+            border-radius: 16px;
+        }
+        .bill-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 12px 0;
+        }
+        .discount-input {
+            width: 130px;
+            padding: 8px 12px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: var(--bg-surface);
+            color: var(--text-primary);
+            text-align: right;
+        }
+
+        /* Receipt Print Style */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            .minimal-receipt-print, .minimal-receipt-print * {
+                visibility: visible;
+            }
+            .minimal-receipt-print {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                margin: 0;
+                padding: 0;
+            }
+        }
+
+        .minimal-receipt-print {
+            font-family: 'SF Mono', 'Courier New', 'Courier', monospace;
+            background: white;
+            color: black;
+            width: 100%;
+            max-width: 300px;
+            margin: 0 auto;
+            padding: 16px 12px;
+            font-size: 11px;
+            line-height: 1.45;
+        }
+        .receipt-line {
+            border-top: 1px dashed #aaa;
+            margin: 8px 0;
+        }
+        .receipt-double-line {
+            border-top: 2px solid #000;
+            margin: 8px 0;
+        }
+        .receipt-header {
+            text-align: center;
+            margin-bottom: 12px;
+        }
+        .brand-name {
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
+        .brand-tagline {
+            font-size: 9px;
+            letter-spacing: 1px;
+            color: #555;
+        }
+        .receipt-info-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 4px 0;
+        }
+        .receipt-items-table {
+            width: 100%;
+            margin: 8px 0;
+            border-collapse: collapse;
+        }
+        .receipt-items-table th {
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 4px;
+        }
+        .receipt-items-table td {
+            padding: 4px 0;
+        }
+        .col-item { width: 55%; }
+        .col-qty { width: 15%; text-align: center; }
+        .col-price { width: 30%; text-align: right; }
+        
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 6px 0;
+            font-weight: 600;
+        }
+        .grand-total {
+            font-size: 13px;
+            font-weight: 700;
+            margin: 8px 0;
+        }
+        .footer-text {
+            text-align: center;
+            margin-top: 12px;
+            font-size: 9px;
+            color: #555;
+        }
+        .payment-line {
+            margin: 8px 0;
+            text-align: left;
+        }
+
+        .flex-btns { display: flex; gap: 12px; margin-top: 16px; }
+        .product-item-control {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border-light);
+        }
+        .credit-line {
+            text-align: center;
+            font-size: 10px;
+            margin-top: 20px;
+            color: var(--text-secondary);
+        }
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 14px;
+        }
+        table {
+            width: 100%;
+            font-size: 0.75rem;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px 8px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-light);
+        }
+        th {
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal-content-custom {
+            background: var(--bg-surface);
+            border-radius: 24px;
+            padding: 28px;
+            width: 90%;
+            max-width: 450px;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+        }
+        .employee-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-light);
+        }
+        .admin-zone-btn {
+            background: var(--danger);
+            color: white;
+            width: 100%;
+            padding: 14px;
+            border-radius: 14px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            margin-top: 16px;
+        }
+        
+        audio { display: none; }
+    </style>
+</head>
+<body>
+<audio id="clickSound" preload="auto"><source src="https://www.soundjay.com/misc/sounds/button-click-01.mp3" type="audio/mpeg"></audio>
+<audio id="successSound" preload="auto"><source src="https://www.soundjay.com/misc/sounds/cash-register-01.mp3" type="audio/mpeg"></audio>
+
+<div class="app-container">
+    <div id="loginScreen" class="login-card">
+        <h2>Minimal Billing</h2>
+        <p>Enter staff name & PIN to continue</p>
+        <input type="text" id="loginStaffInput" class="login-input" placeholder="Staff name" autocomplete="off">
+        <input type="password" id="loginPinInput" class="login-input" placeholder="4-digit PIN" maxlength="4" style="text-align: center; letter-spacing: 4px;">
+        <button id="doLoginBtn" class="btn-primary">Start Session</button>
+        <p style="font-size: 11px; margin-top: 16px; color: var(--text-secondary);">Default Staff PIN: 1234 | Admin PIN: 0000</p>
+    </div>
+
+    <div id="mainDashboard" style="display: none;">
+        <div class="header-bar">
+            <div class="live-clock-header" id="liveClock"></div>
+            <button id="darkModeToggle" class="dark-mode-toggle">Dark Mode</button>
+        </div>
+        <div class="nav-tabs">
+            <button class="nav-tab active" data-page="sales">Billing</button>
+            <button class="nav-tab" data-page="totals">Totals</button>
+            <button class="nav-tab" data-page="insights">Insights</button>
+            <button class="nav-tab" data-page="settings">Settings</button>
+        </div>
+
+        <!-- Billing Page -->
+        <div id="salesPage" class="page active-page">
+            <div class="card">
+                <div class="card-title">Menu</div>
+                <div class="btn-group" id="productButtonsList"></div>
+
+                <div class="card-title">Current Order</div>
+                <div id="cartContainer"></div>
+                <div class="bill-preview-card card">
+                    <div class="bill-row"><span>Total Items</span><span id="cartTotalItemsSpan">0</span></div>
+                    <div class="bill-row"><span>Subtotal</span><span id="cartAmountSpan">0</span></div>
+                    <div class="bill-row"><span>Discount (%)</span>
+                        <input type="number" id="discountPercentInput" placeholder="0" value="0" step="1" min="0" max="100" class="discount-input" style="width:100px;">
+                    </div>
+                    <div class="bill-row"><span><strong>Grand Total</strong></span><span id="finalTotalSpan"><strong>0</strong></span></div>
+                </div>
+
+                <div class="card-title">Order Type</div>
+                <div class="btn-group">
+                    <button id="orderParcelBtn" class="btn">Parcel</button>
+                    <button id="orderDineinBtn" class="btn">Dine-in</button>
+                </div>
+                <div class="card-title">Payment Mode</div>
+                <div class="btn-group">
+                    <button id="payCashBtn" class="btn">Cash</button>
+                    <button id="payCardBtn" class="btn">Card</button>
+                    <button id="payUpiBtn" class="btn">UPI</button>
+                </div>
+                <div class="card-title">Category</div>
+                <div class="btn-group">
+                    <button id="catCustomerBtn" class="btn">Customer</button>
+                    <button id="catEmployeeBtn" class="btn">Employee</button>
+                </div>
+
+                <div class="setting-row" style="margin-top: 6px;">
+                    <label>Customer Name (optional)</label>
+                    <input type="text" id="customerNameField" placeholder="Guest" style="border-radius:12px;">
+                </div>
+
+                <button id="addSaleWithBillBtn" class="btn-primary">Confirm Sale</button>
+                <button id="printReceiptBtn" class="btn-secondary" style="width:100%; margin-top: 12px;">Print Receipt</button>
+                <button id="endSessionFromSalesBtn" class="btn-danger" style="margin-top: 12px;">End Session</button>
+            </div>
+        </div>
+
+        <!-- Totals Page -->
+        <div id="totalsPage" class="page">
+            <div class="stats-grid">
+                <div class="stat-tile"><div class="stat-label">Total Items</div><div class="stat-number" id="totalItemsStat">0</div></div>
+                <div class="stat-tile"><div class="stat-label">Total Revenue</div><div class="stat-number" id="totalRevenueStat">0</div></div>
+                <div class="stat-tile"><div class="stat-label">Parcel</div><div class="stat-number" id="parcelCountStat">0</div></div>
+                <div class="stat-tile"><div class="stat-label">Dine-in</div><div class="stat-number" id="dineinCountStat">0</div></div>
+            </div>
+            
+            <div class="card">
+                <div class="card-title">Payment Split</div>
+                <div class="payment-split-grid">
+                    <div class="payment-card"><div class="stat-label">Cash</div><div class="payment-amount" id="cashTotalStat">0</div></div>
+                    <div class="payment-card"><div class="stat-label">Card</div><div class="payment-amount" id="cardTotalStat">0</div></div>
+                    <div class="payment-card"><div class="stat-label">UPI</div><div class="payment-amount" id="upiTotalStat">0</div></div>
+                </div>
+            </div>
+
+            <div class="card-title">Transactions</div>
+            <div class="table-wrapper">
+                <table id="totalsTable">
+                    <thead><tr><th>#</th><th>Time</th><th>Item</th><th>Amount</th><th>Payment</th><th>Staff</th></tr></thead>
+                    <tbody id="totalsTableBody"></tbody>
+                </table>
+            </div>
+            <div class="flex-btns">
+                <button id="resetDayTotalsBtn" class="btn-secondary" style="flex:1;">Reset Day</button>
+            </div>
+        </div>
+
+        <!-- Insights Page -->
+        <div id="insightsPage" class="page">
+            <div class="card"><div class="card-title">Daily Summary</div><div id="insightSummary"></div></div>
+            <div class="card"><div class="card-title">Staff Performance</div><div id="staffPerfList"></div></div>
+            <div class="card"><div class="card-title">Top Products</div><div id="topProductsInsight"></div></div>
+        </div>
+
+        <!-- Settings Page -->
+        <div id="settingsPage" class="page">
+            <div class="card">
+                <div class="card-title">Business Profile</div>
+                <div class="setting-row"><label>Brand Name</label><input type="text" id="businessNameInput" placeholder="Your Brand Name"></div>
+                <div class="setting-row"><label>Tagline / Subtitle</label><input type="text" id="businessTagline" placeholder="Minimalist Lifestyle -"></div>
+                <div class="setting-row"><label>Address / Contact</label><input type="text" id="businessInfoInput" placeholder="Phone, address"></div>
+                <div class="setting-row"><label>Website / Footer Message</label><input type="text" id="footerMsgInput" placeholder="yourwebsite.com"></div>
+                <div class="setting-row"><label>Currency Symbol</label>
+                    <select id="currencySelect">
+                        <option value="$">USD ($)</option><option value="€">Euro (€)</option><option value="£">GBP (£)</option>
+                        <option value="₹">INR (₹)</option><option value="¥">JPY (¥)</option><option value="A$">AUD (A$)</option>
+                        <option value="C$">CAD (C$)</option><option value="﷼">SAR (﷼)</option><option value="د.إ">AED (د.إ)</option>
+                    </select>
+                </div>
+                <button id="saveBusinessSettingsBtn" class="btn-secondary">Save Settings</button>
+            </div>
+            <div class="card">
+                <div class="card-title">Tax Configuration</div>
+                <div class="setting-row"><label>Tax Rate (%)</label><input type="number" id="defaultTaxRate" step="0.5" placeholder="e.g., 8" value="0"></div>
+                <div class="setting-row"><label>Tax Name</label><input type="text" id="taxName" placeholder="GST / VAT" value="TAX"></div>
+                <button id="saveTaxDefaultsBtn" class="btn-secondary">Save Tax Settings</button>
+                <div class="card-title" style="margin-top: 20px;">Manage Menu</div>
+                <div id="dynamicProductList"></div>
+                <div style="display:flex; gap:10px; margin-top:12px;">
+                    <input type="text" id="newProdName" placeholder="Product name" style="flex:2; padding:10px; border-radius:12px; border:1px solid var(--border); background:var(--bg-surface);">
+                    <input type="number" id="newProdPrice" placeholder="Price" style="flex:1; padding:10px; border-radius:12px; border:1px solid var(--border); background:var(--bg-surface);">
+                    <button id="addProductBtnSettings" class="btn-secondary">Add</button>
+                </div>
+                <hr style="margin:20px 0; border-color:var(--border);">
+                <button id="adminZoneBtn" class="admin-zone-btn">🔐 Admin Zone</button>
+                <div class="credit-line">Made by Meraj Mohi Uddin (Meraj Shah)</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Admin Password Modal -->
+<div id="adminPasswordModal" class="modal-overlay">
+    <div class="modal-content-custom">
+        <h3 style="margin-bottom: 16px;">Admin Verification</h3>
+        <input type="password" id="adminPasswordInput" placeholder="Enter Admin PIN" class="login-input" maxlength="4" style="text-align: center; letter-spacing: 4px;">
+        <button id="verifyAdminBtn" class="btn-primary" style="margin-top: 16px;">Verify</button>
+        <button id="closeAdminPasswordModal" class="btn-secondary" style="margin-top: 12px; width: 100%;">Cancel</button>
+    </div>
+</div>
+
+<!-- Admin Panel Modal -->
+<div id="adminPanelModal" class="modal-overlay">
+    <div class="modal-content-custom">
+        <h3>👑 Admin Control Panel</h3>
+        
+        <div class="card-title" style="margin-top: 16px;">👥 Manage Employees</div>
+        <div id="employeesList"></div>
+        <div style="display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap;">
+            <input type="text" id="newEmpName" placeholder="Employee Name" style="flex:2; padding: 10px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg-surface);">
+            <input type="password" id="newEmpPin" placeholder="PIN" maxlength="4" style="flex:1; padding: 10px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg-surface);">
+            <button id="addEmployeeBtn" class="btn-primary" style="width: auto; padding: 10px 16px;">Add</button>
+        </div>
+
+        <div class="card-title" style="margin-top: 20px;">🔑 Change Admin PIN</div>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <input type="password" id="newAdminPin1" placeholder="New Admin PIN" maxlength="4" style="flex:1; padding: 10px; border-radius: 12px; border: 1px solid var(--border);">
+            <input type="password" id="newAdminPin2" placeholder="Confirm PIN" maxlength="4" style="flex:1; padding: 10px; border-radius: 12px; border: 1px solid var(--border);">
+            <button id="updateAdminPinBtn" class="btn-primary" style="width: auto;">Update</button>
+        </div>
+
+        <div class="card-title" style="margin-top: 20px;">⚠️ Danger Zone</div>
+        <button id="factoryResetBtn" class="btn-danger" style="width: 100%;">Factory Reset All Data</button>
+        
+        <button id="closeAdminPanelBtn" class="btn-secondary" style="margin-top: 16px; width: 100%;">Close Panel</button>
+    </div>
+</div>
+
+<!-- Factory Reset Confirm Modal -->
+<div id="factoryResetConfirmModal" class="modal-overlay">
+    <div class="modal-content-custom">
+        <h3 style="color: var(--danger);">⚠️ Factory Reset</h3>
+        <p style="margin: 16px 0;">Type <strong style="color: var(--danger);">DELETE</strong> to confirm factory reset. This will erase all data.</p>
+        <input type="text" id="resetConfirmInput" placeholder="Type DELETE" class="login-input">
+        <button id="confirmFactoryResetBtn" class="btn-danger" style="width: 100%;">Confirm Reset</button>
+        <button id="cancelFactoryResetBtn" class="btn-secondary" style="margin-top: 12px; width: 100%;">Cancel</button>
+    </div>
+</div>
+
+<script>
+    // ---------- STATE ----------
+    let products = [
+        { id: "p1", name: "Ceramic Mug", price: 24 },
+        { id: "p2", name: "Linen Table Runner", price: 18 },
+        { id: "p3", name: "Aroma Candle", price: 18 },
+        { id: "p4", name: "Minimalist Tray", price: 32 },
+        { id: "p5", name: "Bamboo Coasters", price: 12 }
+    ];
+    let sales = [];
+    let currentStaff = null;
+    let cart = [];
+    let selectedOrder = "parcel";
+    let selectedPayment = "cash";
+    let selectedCategory = "customer";
+    let billCounter = 98432;
+    
+    let businessName = "YOUR BRAND NAME";
+    let businessTagline = "Minimalist Lifestyle";
+    let businessInfo = "123 Minimal St, Design District";
+    let footerMessage = "yourwebsite.com";
+    let currencySymbol = "$";
+    let defaultTaxPercent = 8;
+    let taxName = "TAX";
+    let darkMode = false;
+    
+    // Security
+    let adminPin = "0000";
+    let employees = [{ name: "Staff", pin: "1234" }];
+    
+    const STORAGE_KEY = "minimal_billing_system";
+    
+    function playClick() { try { document.getElementById("clickSound").play(); } catch(e){} }
+    function playSuccess() { try { document.getElementById("successSound").play(); } catch(e){} }
+    
+    function saveAll() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+            products, sales, businessName, businessTagline, businessInfo, footerMessage, currencySymbol,
+            defaultTaxPercent, taxName, billCounter, darkMode, adminPin, employees
+        }));
+    }
+    
+    function loadAll() {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+            try {
+                const data = JSON.parse(raw);
+                if (data.products && data.products.length) products = data.products;
+                if (data.sales) sales = data.sales;
+                if (data.businessName) businessName = data.businessName;
+                if (data.businessTagline) businessTagline = data.businessTagline;
+                if (data.businessInfo) businessInfo = data.businessInfo;
+                if (data.footerMessage) footerMessage = data.footerMessage;
+                if (data.currencySymbol) currencySymbol = data.currencySymbol;
+                if (data.defaultTaxPercent !== undefined) defaultTaxPercent = data.defaultTaxPercent;
+                if (data.taxName) taxName = data.taxName;
+                if (data.billCounter) billCounter = data.billCounter;
+                if (data.darkMode !== undefined) darkMode = data.darkMode;
+                if (data.adminPin) adminPin = data.adminPin;
+                if (data.employees && data.employees.length) employees = data.employees;
+                else employees = [{ name: "Staff", pin: "1234" }];
+            } catch(e) {}
+        }
+        if (!products.length) products = [{ id:"p1", name:"Ceramic Mug", price:24 }];
+        if (darkMode) document.body.classList.add('dark');
+        else document.body.classList.remove('dark');
+    }
+    
+    function getFormattedDate() {
+        const d = new Date();
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        return d.toLocaleDateString('en-IN', options);
+    }
+    
+    function getCurrentTime() {
+        const now = new Date();
+        let h = now.getHours();
+        const ampm = h >= 12 ? 'PM' : 'AM';
+        h = h % 12 || 12;
+        return `${h}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')} ${ampm}`;
+    }
+    function getCurrentDate() { 
+        const d = new Date();
+        return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }
+    
+    function updateClock() {
+        const clockElement = document.getElementById("liveClock");
+        if(clockElement) {
+            clockElement.innerHTML = `${getFormattedDate()} | ${getCurrentTime()}`;
+        }
+        setTimeout(updateClock, 1000);
+    }
+    
+    function getSubtotal() { return cart.reduce((s,i)=> s + (i.price * i.quantity), 0); }
+    
+    function computeGrandTotal() {
+        const subtotal = getSubtotal();
+        const discountPercent = parseFloat(document.getElementById("discountPercentInput")?.value) || 0;
+        const discountVal = (subtotal * discountPercent) / 100;
+        const afterDiscount = subtotal - discountVal;
+        const taxVal = (afterDiscount * defaultTaxPercent) / 100;
+        const grand = afterDiscount + taxVal;
+        return { discountVal, taxVal, grand: grand < 0 ? 0 : grand, discountPercent, afterDiscount };
+    }
+    
+    function confirmSale() {
+        if (cart.length === 0) return;
+        if (!currentStaff) return;
+        
+        const discountPercent = parseFloat(document.getElementById("discountPercentInput")?.value) || 0;
+        const subtotal = getSubtotal();
+        const discountVal = (subtotal * discountPercent) / 100;
+        const afterDiscount = subtotal - discountVal;
+        const taxVal = (afterDiscount * defaultTaxPercent) / 100;
+        const grandTotal = afterDiscount + taxVal;
+        const customerName = document.getElementById("customerNameField")?.value.trim() || "Guest";
+        const currentDate = getCurrentDate();
+        const currentTime = getCurrentTime();
+        const timestampNow = Date.now();
+        
+        let idx = 0;
+        const paymentMode = selectedPayment === "cash" ? "Cash" : (selectedPayment === "card" ? "Card" : "UPI");
+        const orderTypeVal = selectedOrder === "parcel" ? "Parcel" : "Dine-in";
+        const categoryVal = selectedCategory === "customer" ? "Customer" : "Employee";
+        
+        for (let item of cart) {
+            for (let q=0; q<item.quantity; q++) {
+                sales.push({
+                    id: Date.now() + Math.random() + idx++,
+                    date: currentDate, time: currentTime, timestampMs: timestampNow + q,
+                    productId: item.productId, productName: item.name, price: item.price,
+                    orderType: orderTypeVal, paymentMode: paymentMode,
+                    category: categoryVal, addedBy: currentStaff, customerName: customerName,
+                    billNumber: billCounter, discountPercent: discountPercent, discountAmount: discountVal,
+                    taxPercent: defaultTaxPercent, taxAmount: taxVal, finalAmount: grandTotal
+                });
+            }
+        }
+        billCounter++;
+        saveAll();
+        
+        cart = [];
+        document.getElementById("discountPercentInput").value = "0";
+        document.getElementById("customerNameField").value = "";
+        renderAllUI();
+        playSuccess();
+    }
+    
+    function printReceipt() {
+        if (cart.length === 0) return;
+        const { discountVal, taxVal, grand, discountPercent } = computeGrandTotal();
+        const subtotal = getSubtotal();
+        const customer = document.getElementById("customerNameField")?.value.trim() || "Guest";
+        const paymentLabel = selectedPayment === "cash" ? "Cash" : (selectedPayment === "card" ? "Card" : "UPI");
+        const currentTime = getCurrentTime();
+        const currentDateFormatted = getFormattedDate();
+        const invoiceNum = billCounter;
+        
+        let itemsHtml = "";
+        cart.forEach(item => {
+            itemsHtml += `<tr><td class="col-item">${item.name}</td><td class="col-qty">${item.quantity}</td><td class="col-price">${currencySymbol}${(item.price * item.quantity).toFixed(2)}</td></tr>`;
+        });
+        
+        const discountLine = discountPercent > 0 ? `<div class="receipt-info-row"><span>DISCOUNT (${discountPercent}%)</span><span>-${currencySymbol}${discountVal.toFixed(2)}</span></div>` : '';
+        const taxLine = defaultTaxPercent > 0 ? `<div class="receipt-info-row"><span>${taxName} (${defaultTaxPercent}%)</span><span>${currencySymbol}${taxVal.toFixed(2)}</span></div>` : '';
+        
+        const receiptHtml = `
+            <div class="minimal-receipt-print">
+                <div class="receipt-header">
+                    <div class="brand-name">${businessName.toUpperCase()}</div>
+                    <div class="brand-tagline">- ${businessTagline} -</div>
+                </div>
+                <div class="receipt-line"></div>
+                <div class="receipt-info-row">
+                    <span>Inv: #${invoiceNum}</span>
+                    <span>Date: ${currentDateFormatted}</span>
+                </div>
+                <div class="receipt-info-row">
+                    <span>Cashier: ${currentStaff}</span>
+                    <span>Time: ${currentTime}</span>
+                </div>
+                <div class="receipt-line"></div>
+                <div class="receipt-info-row">
+                    <span>ITEM</span>
+                    <span style="margin-left: auto;">QTY     PRICE</span>
+                </div>
+                <div class="receipt-line"></div>
+                <table class="receipt-items-table">
+                    ${itemsHtml}
+                </table>
+                <div class="receipt-line"></div>
+                <div class="receipt-info-row"><span>SUBTOTAL</span><span>${currencySymbol}${subtotal.toFixed(2)}</span></div>
+                ${discountLine}
+                ${taxLine}
+                <div class="receipt-double-line"></div>
+                <div class="grand-total receipt-info-row"><span>TOTAL</span><span>${currencySymbol}${grand.toFixed(2)}</span></div>
+                <div class="receipt-double-line"></div>
+                <div class="payment-line">Payment: ${paymentLabel}</div>
+                <div class="footer-text">Thank you for shopping!</div>
+                <div class="footer-text">Visit: ${footerMessage}</div>
+                <div class="receipt-line"></div>
+            </div>
+        `;
+        
+        const printWindow = window.open('', '_blank', 'width=400,height=600');
+        printWindow.document.write(`
+            <html>
+            <head>
+                <title>Print Receipt</title>
+                <style>
+                    * { margin: 0; padding: 0; box-sizing: border-box; }
+                    body { 
+                        display: flex; 
+                        justify-content: center; 
+                        align-items: center; 
+                        min-height: 100vh;
+                        background: #f0f0f0;
+                        font-family: 'SF Mono', 'Courier New', monospace;
+                    }
+                    @media print {
+                        body { background: white; }
+                    }
+                </style>
+            </head>
+            <body>
+                ${receiptHtml}
+            </body>
+            </html>
+        `);
+        printWindow.document.close();
+        printWindow.print();
+    }
+    
+    function renderProductButtons() {
+        const container = document.getElementById("productButtonsList");
+        if(!container) return;
+        container.innerHTML = products.map(p => `<button class="btn" data-id="${p.id}" data-name="${p.name}" data-price="${p.price}">${p.name}<br><span style="font-size:10px;">${currencySymbol}${p.price}</span></button>`).join('');
+        document.querySelectorAll('[data-id]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const id = btn.dataset.id, name = btn.dataset.name, price = parseFloat(btn.dataset.price);
+                const exist = cart.find(i => i.productId === id);
+                if(exist) exist.quantity++;
+                else cart.push({ productId:id, name, price, quantity:1 });
+                renderCartUI();
+                playClick();
+            });
+        });
+    }
+    
+    function renderCartUI() {
+        const container = document.getElementById("cartContainer");
+        const totalSpan = document.getElementById("cartTotalItemsSpan");
+        const subtotalSpan = document.getElementById("cartAmountSpan");
+        if(!container) return;
+        if(cart.length===0){ container.innerHTML="<div style='padding:20px; text-align:center; color:var(--text-secondary);'>Cart empty</div>"; totalSpan.innerText="0"; subtotalSpan.innerText="0"; updateDisplay(); return; }
+        let html = "";
+        cart.forEach((item, idx) => {
+            html += `<div class="cart-item"><span><strong>${item.name}</strong></span><div><button class="qty-btn" data-idx="${idx}" data-delta="-1">-</button> <span style="margin:0 8px;">${item.quantity}</span> <button class="qty-btn" data-idx="${idx}" data-delta="1">+</button> <span style="margin-left:10px;">${currencySymbol}${(item.price*item.quantity).toFixed(2)}</span> <button class="remove-item" data-idx="${idx}">X</button></div></div>`;
+        });
+        container.innerHTML = html;
+        document.querySelectorAll('.qty-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                let idx = parseInt(btn.dataset.idx), delta = parseInt(btn.dataset.delta);
+                let newQty = cart[idx].quantity + delta;
+                if(newQty <= 0) cart.splice(idx,1);
+                else cart[idx].quantity = newQty;
+                renderCartUI();
+            });
+        });
+        document.querySelectorAll('.remove-item').forEach(btn => {
+            btn.addEventListener('click', () => { cart.splice(parseInt(btn.dataset.idx),1); renderCartUI(); });
+        });
+        const totalQty = cart.reduce((a,b)=>a+b.quantity,0);
+        totalSpan.innerText = totalQty;
+        subtotalSpan.innerText = getSubtotal().toFixed(2);
+        updateDisplay();
+    }
+    
+    function updateDisplay() {
+        const { grand } = computeGrandTotal();
+        document.getElementById("finalTotalSpan").innerHTML = `<strong>${currencySymbol}${grand.toFixed(2)}</strong>`;
+    }
+    
+    function renderTotalsPage() {
+        const customerSales = sales.filter(s=> s.category === "Customer");
+        const revenue = customerSales.reduce((s,i)=>s+i.price,0);
+        const parcelCount = sales.filter(s=>s.orderType==="Parcel").length;
+        const dineinCount = sales.filter(s=>s.orderType==="Dine-in").length;
+        
+        const cashTotal = sales.filter(s=>s.paymentMode==="Cash" && s.category==="Customer").reduce((s,i)=>s+i.price,0);
+        const cardTotal = sales.filter(s=>s.paymentMode==="Card" && s.category==="Customer").reduce((s,i)=>s+i.price,0);
+        const upiTotal = sales.filter(s=>s.paymentMode==="UPI" && s.category==="Customer").reduce((s,i)=>s+i.price,0);
+        
+        document.getElementById("totalItemsStat").innerHTML = sales.length;
+        document.getElementById("totalRevenueStat").innerHTML = `${currencySymbol}${revenue.toFixed(2)}`;
+        document.getElementById("parcelCountStat").innerHTML = parcelCount;
+        document.getElementById("dineinCountStat").innerHTML = dineinCount;
+        document.getElementById("cashTotalStat").innerHTML = `${currencySymbol}${cashTotal.toFixed(2)}`;
+        document.getElementById("cardTotalStat").innerHTML = `${currencySymbol}${cardTotal.toFixed(2)}`;
+        document.getElementById("upiTotalStat").innerHTML = `${currencySymbol}${upiTotal.toFixed(2)}`;
+        
+        const tbody = document.getElementById("totalsTableBody");
+        if(!sales.length){ tbody.innerHTML="<tr><td colspan='6' style='text-align:center'>No records</td><tr>"; return; }
+        tbody.innerHTML = sales.slice().reverse().map((s,i)=>`<tr><td>${i+1}</td><td>${s.time}</td><td>${s.productName}</td><td>${currencySymbol}${s.price}</td><td>${s.paymentMode}</td><td>${s.addedBy}</td></tr>`).join('');
+    }
+    
+    function renderInsights() {
+        const staffMap = new Map();
+        sales.forEach(s=>{ let st = s.addedBy; if(!staffMap.has(st)) staffMap.set(st,{items:0,rev:0}); let d=staffMap.get(st); d.items++; if(s.category==="Customer") d.rev+=s.price; });
+        let staffHtml = staffMap.size ? Array.from(staffMap.entries()).map(([n,d])=>`<div style="margin-bottom:10px;"><strong>${n}</strong> — ${d.items} items | ${currencySymbol}${d.rev.toFixed(2)}</div>`).join('') : "<div>No sales</div>";
+        document.getElementById("staffPerfList").innerHTML = staffHtml;
+        let prodCount = {};
+        sales.filter(s=>s.category==="Customer").forEach(s=>{ prodCount[s.productName] = (prodCount[s.productName]||0)+1; });
+        let top = Object.entries(prodCount).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([n,c])=>`<div>${n} — ${c} sold</div>`).join('');
+        document.getElementById("topProductsInsight").innerHTML = top || "<div>No data</div>";
+        document.getElementById("insightSummary").innerHTML = `<div>Total Sales: ${sales.length} items | Employee meals: ${sales.filter(s=>s.category==="Employee").length}</div>`;
+    }
+    
+    function renderSettingsUI() {
+        document.getElementById("businessNameInput").value = businessName;
+        document.getElementById("businessTagline").value = businessTagline;
+        document.getElementById("businessInfoInput").value = businessInfo;
+        document.getElementById("footerMsgInput").value = footerMessage;
+        document.getElementById("currencySelect").value = currencySymbol;
+        document.getElementById("defaultTaxRate").value = defaultTaxPercent;
+        document.getElementById("taxName").value = taxName;
+        const prodContainer = document.getElementById("dynamicProductList");
+        prodContainer.innerHTML = products.map(p => `<div class="product-item-control"><span>${p.name} — ${currencySymbol}${p.price}</span><button class="delProdBtn" data-id="${p.id}" style="background:var(--danger); color:white; border:none; border-radius:10px; padding:4px 14px; cursor:pointer;">Remove</button></div>`).join('');
+        document.querySelectorAll('.delProdBtn').forEach(btn => {
+            btn.addEventListener('click', () => { if(products.length>1){ products = products.filter(p=> p.id !== btn.dataset.id); saveAll(); renderAllUI(); } });
+        });
+    }
+    
+    function renderEmployees() {
+        const container = document.getElementById("employeesList");
+        if(!container) return;
+        container.innerHTML = employees.map((emp, idx) => `<div class="employee-item"><span><strong>${emp.name}</strong> (PIN: ${emp.pin})</span><button class="removeEmpBtn" data-idx="${idx}" style="background:var(--danger); color:white; border:none; border-radius:10px; padding:4px 12px; cursor:pointer;">Remove</button></div>`).join('');
+        document.querySelectorAll('.removeEmpBtn').forEach(btn => {
+            btn.onclick = () => { if(employees.length > 1) { employees.splice(parseInt(btn.dataset.idx), 1); saveAll(); renderEmployees(); } else alert("At least one employee required"); };
+        });
+    }
+    
+    function renderActiveStates() {
+        document.getElementById("orderParcelBtn")?.classList.toggle("active", selectedOrder==="parcel");
+        document.getElementById("orderDineinBtn")?.classList.toggle("active", selectedOrder==="dinein");
+        document.getElementById("payCashBtn")?.classList.toggle("active", selectedPayment==="cash");
+        document.getElementById("payCardBtn")?.classList.toggle("active", selectedPayment==="card");
+        document.getElementById("payUpiBtn")?.classList.toggle("active", selectedPayment==="upi");
+        document.getElementById("catCustomerBtn")?.classList.toggle("active", selectedCategory==="customer");
+        document.getElementById("catEmployeeBtn")?.classList.toggle("active", selectedCategory==="employee");
+    }
+    
+    function renderAllUI() { renderProductButtons(); renderCartUI(); renderActiveStates(); renderTotalsPage(); renderInsights(); renderSettingsUI(); }
+    
+    function resetDay() { if(confirm("Reset all sales?")){ sales=[]; saveAll(); renderAllUI(); } }
+    
+    function factoryReset() {
+        products = [{ id: "p1", name: "Ceramic Mug", price: 24 }, { id: "p2", name: "Linen Table Runner", price: 18 }, { id: "p3", name: "Aroma Candle", price: 18 }, { id: "p4", name: "Minimalist Tray", price: 32 }, { id: "p5", name: "Bamboo Coasters", price: 12 }];
+        sales = [];
+        businessName = "YOUR BRAND NAME";
+        businessTagline = "Minimalist Lifestyle";
+        businessInfo = "123 Minimal St, Design District";
+        footerMessage = "yourwebsite.com";
+        currencySymbol = "$";
+        defaultTaxPercent = 8;
+        taxName = "TAX";
+        billCounter = 98432;
+        adminPin = "0000";
+        employees = [{ name: "Staff", pin: "1234" }];
+        cart = [];
+        saveAll();
+        renderAllUI();
+        alert("Factory reset completed!");
+    }
+    
+    function addProduct() { let name=document.getElementById("newProdName").value.trim(); let price=parseFloat(document.getElementById("newProdPrice").value); if(name && !isNaN(price) && price>0){ products.push({ id:"p_"+Date.now(), name, price }); saveAll(); renderAllUI(); document.getElementById("newProdName").value=""; document.getElementById("newProdPrice").value=""; } }
+    function saveBusiness() { businessName=document.getElementById("businessNameInput").value; businessTagline=document.getElementById("businessTagline").value; businessInfo=document.getElementById("businessInfoInput").value; footerMessage=document.getElementById("footerMsgInput").value; currencySymbol=document.getElementById("currencySelect").value; saveAll(); renderAllUI(); }
+    function saveTax() { defaultTaxPercent=parseFloat(document.getElementById("defaultTaxRate").value)||0; taxName=document.getElementById("taxName").value; saveAll(); renderAllUI(); }
+    function toggleDarkMode() { darkMode = !darkMode; if(darkMode) document.body.classList.add('dark'); else document.body.classList.remove('dark'); saveAll(); }
+    
+    function init() {
+        loadAll();
+        updateClock();
+        
+        document.getElementById("doLoginBtn").onclick=()=>{ 
+            let name = document.getElementById("loginStaffInput").value.trim(); 
+            let pin = document.getElementById("loginPinInput").value;
+            let validEmployee = employees.find(e => e.name === name && e.pin === pin);
+            if(validEmployee){ 
+                currentStaff = name; 
+                document.getElementById("loginScreen").style.display="none"; 
+                document.getElementById("mainDashboard").style.display="block"; 
+                renderAllUI(); 
+            } else if(pin === adminPin) {
+                currentStaff = "Admin";
+                document.getElementById("loginScreen").style.display="none"; 
+                document.getElementById("mainDashboard").style.display="block"; 
+                renderAllUI();
+            } else { 
+                alert("Invalid credentials! Check Name and PIN (Default Staff PIN: 1234)"); 
+            }
+        };
+        
+        document.querySelectorAll(".nav-tab").forEach(t=>{ t.onclick=()=>{ document.querySelectorAll(".nav-tab").forEach(n=>n.classList.remove("active")); t.classList.add("active"); document.querySelectorAll(".page").forEach(p=>p.classList.remove("active-page")); document.getElementById(t.dataset.page+"Page").classList.add("active-page"); }; });
+        document.getElementById("orderParcelBtn").onclick=()=>{ selectedOrder="parcel"; renderActiveStates(); };
+        document.getElementById("orderDineinBtn").onclick=()=>{ selectedOrder="dinein"; renderActiveStates(); };
+        document.getElementById("payCashBtn").onclick=()=>{ selectedPayment="cash"; renderActiveStates(); };
+        document.getElementById("payCardBtn").onclick=()=>{ selectedPayment="card"; renderActiveStates(); };
+        document.getElementById("payUpiBtn").onclick=()=>{ selectedPayment="upi"; renderActiveStates(); };
+        document.getElementById("catCustomerBtn").onclick=()=>{ selectedCategory="customer"; renderActiveStates(); };
+        document.getElementById("catEmployeeBtn").onclick=()=>{ selectedCategory="employee"; renderActiveStates(); };
+        document.getElementById("addSaleWithBillBtn").onclick=confirmSale;
+        document.getElementById("printReceiptBtn").onclick=printReceipt;
+        document.getElementById("resetDayTotalsBtn").onclick=resetDay;
+        document.getElementById("addProductBtnSettings").onclick=addProduct;
+        document.getElementById("saveBusinessSettingsBtn").onclick=saveBusiness;
+        document.getElementById("saveTaxDefaultsBtn").onclick=saveTax;
+        document.getElementById("endSessionFromSalesBtn").onclick=()=>{ if(confirm("Logout?")) location.reload(); };
+        document.getElementById("darkModeToggle").onclick=toggleDarkMode;
+        document.getElementById("discountPercentInput").addEventListener('input', ()=>updateDisplay());
+        document.getElementById("loginStaffInput").addEventListener("keypress",(e)=>{ if(e.key==="Enter") document.getElementById("doLoginBtn").click(); });
+        
+        // Admin Zone Logic
+        document.getElementById("adminZoneBtn").onclick = () => document.getElementById("adminPasswordModal").classList.add("active");
+        document.getElementById("closeAdminPasswordModal").onclick = () => document.getElementById("adminPasswordModal").classList.remove("active");
+        document.getElementById("verifyAdminBtn").onclick = () => {
+            let entered = document.getElementById("adminPasswordInput").value;
+            if(entered === adminPin) {
+                document.getElementById("adminPasswordModal").classList.remove("active");
+                document.getElementById("adminPanelModal").classList.add("active");
+                renderEmployees();
+            } else alert("Wrong Admin PIN");
+        };
+        document.getElementById("closeAdminPanelBtn").onclick = () => document.getElementById("adminPanelModal").classList.remove("active");
+        
+        document.getElementById("addEmployeeBtn").onclick = () => {
+            let name = document.getElementById("newEmpName").value.trim();
+            let pin = document.getElementById("newEmpPin").value;
+            if(name && pin.length === 4 && /^\d+$/.test(pin)) {
+                employees.push({ name, pin });
+                saveAll();
+                renderEmployees();
+                document.getElementById("newEmpName").value = "";
+                document.getElementById("newEmpPin").value = "";
+            } else alert("Valid name and 4-digit PIN required");
+        };
+        
+        document.getElementById("updateAdminPinBtn").onclick = () => {
+            let pin1 = document.getElementById("newAdminPin1").value;
+            let pin2 = document.getElementById("newAdminPin2").value;
+            if(pin1.length === 4 && pin1 === pin2 && /^\d+$/.test(pin1)) {
+                adminPin = pin1;
+                saveAll();
+                alert("Admin PIN updated successfully!");
+                document.getElementById("newAdminPin1").value = "";
+                document.getElementById("newAdminPin2").value = "";
+            } else alert("Enter matching 4-digit PIN");
+        };
+        
+        document.getElementById("factoryResetBtn").onclick = () => {
+            document.getElementById("adminPanelModal").classList.remove("active");
+            document.getElementById("factoryResetConfirmModal").classList.add("active");
+        };
+        document.getElementById("cancelFactoryResetBtn").onclick = () => document.getElementById("factoryResetConfirmModal").classList.remove("active");
+        document.getElementById("confirmFactoryResetBtn").onclick = () => {
+            let confirmText = document.getElementById("resetConfirmInput").value;
+            if(confirmText === "DELETE") {
+                factoryReset();
+                document.getElementById("factoryResetConfirmModal").classList.remove("active");
+                alert("Factory reset completed!");
+            } else alert("Type DELETE to confirm reset");
+        };
+        
+        renderAllUI();
+    }
+    init();
+</script>
+</body>
+</html>
